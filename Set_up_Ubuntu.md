@@ -12,6 +12,8 @@
 * libexpat1-dev
 * libxerces-c-dev
 * qtbase5-dev
+* qttools5-dev-tools
+* qt5-default 
 * libx11-dev
 * libxmu-dev
 ## command ?
