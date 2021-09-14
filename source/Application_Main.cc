@@ -34,17 +34,23 @@
    visManager->Initialize();
 
 // Get UI (User Interface) manager
-   G4UImanager* uiManager = G4UImanager::GetUIpointer();
+//   G4UImanager* uiManager = G4UImanager::GetUIpointer();
 
 // Switch batch or interactive mode
-   if ( argc == 1 ) {  // Interactive mode - no command argument
-     auto uiExec = new G4UIExecutive{ argc, argv };
-     uiExec->SessionStart();
-     delete uiExec;
-   } else {            // Batch mode - 1st command argument is a macro-filename
-     G4String macroName = argv[1];
-     uiManager->ApplyCommand( "/control/execute " + macroName );
-   }
+//   if ( argc == 1 ) {  // Interactive mode - no command argument
+//     auto uiExec = new G4UIExecutive{ argc, argv };
+//     uiExec->SessionStart();
+//     delete uiExec;
+//   } else {            // Batch mode - 1st command argument is a macro-filename
+//     G4String macroName = argv[1];
+//     uiManager->ApplyCommand( "/control/execute " + macroName );
+//   }
+
+// Start interactive session
+   auto uiExec = new G4UIExecutive( argc, argv );
+   G4UImanager*  uiManager = G4UImanager::GetUIpointer();
+   uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
+   uiExec->SessionStart();
 
 // Job termination
    delete visManager;
