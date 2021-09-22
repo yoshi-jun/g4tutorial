@@ -33,9 +33,9 @@
 
 // Define 'World Volume'
    // Define the shape of solid
-   G4double leng_X_World = 70.0*cm;         // X-full-length of world
-   G4double leng_Y_World = 70.0*cm;         // Y-full-length of world
-   G4double leng_Z_World = 170.0*cm;         // Z-full-length of world
+   G4double leng_X_World = 100.0 * cm;         // X-full-length of world
+   G4double leng_Y_World = 100.0 * cm;         // Y-full-length of world
+   G4double leng_Z_World = 300.0 * cm;         // Z-full-length of world
    auto solid_World = new G4Box{ "Solid_World",
                          leng_X_World/2.0, leng_Y_World/2.0, leng_Z_World/2.0 };
 
@@ -52,11 +52,11 @@
 
 // Define 'Pixel Detector' - Global Envelop
    // Define the shape of the global envelop
-   G4double leng_X_PixEnvG = 30.5*cm;     // X-full-length of pixel: global envelop
-   G4double leng_Y_PixEnvG = 30.5*cm;     // Y-full-length of pixel: global envelop
-   G4double leng_Z_PixEnvG = 30.0*cm;     // Z-full-length of pixel: global envelop
-   auto solid_PixEnvG = new G4Box{ "Solid_PixEnvG", leng_X_PixEnvG/2.0,
-                                   leng_Y_PixEnvG/2.0, leng_Z_PixEnvG/2.0 };
+   G4double leng_X_PixEnvG = 30.5 * cm;     // X-full-length of pixel: global envelop
+   G4double leng_Y_PixEnvG = 30.5 * cm;     // Y-full-length of pixel: global envelop
+   G4double leng_Z_PixEnvG = 30.0 * cm;     // Z-full-length of pixel: global envelop
+   auto solid_PixEnvG = new G4Box{ "Solid_PixEnvG", leng_X_PixEnvG / 2.0,
+                                   leng_Y_PixEnvG / 2.0, leng_Z_PixEnvG / 2.0 };
 
    // Define logical volume of the global envelop
    G4Material* materi_PixEnvG = materi_Man->FindOrBuildMaterial( "G4_AIR" );
@@ -66,12 +66,12 @@
 
 // Define 'Pixel Detector' - Local Envelop (divided the global envelop in Y-direction)
    // Define the shape of the local envelop
-   G4int nDiv_Y = 61;                                 // Number of divisions in Y-direction
+   G4int nDiv_Y = 5; //61                                 // Number of divisions in Y-direction
    G4double leng_X_PixEnvL = leng_X_PixEnvG;          // X-full-length of pixel: local envelop
-   G4double leng_Y_PixEnvL = leng_Y_PixEnvG/nDiv_Y;   // Y-full-length of pixel: local envelop
+   G4double leng_Y_PixEnvL = leng_Y_PixEnvG / nDiv_Y;   // Y-full-length of pixel: local envelop
    G4double leng_Z_PixEnvL = leng_Z_PixEnvG;          // Z-full-length of pixel: local envelop
-   auto solid_PixEnvL = new G4Box{ "Solid_PixEnvL", leng_X_PixEnvL/2.0,
-                                   leng_Y_PixEnvL/2.0, leng_Z_PixEnvL/2.0 };
+   auto solid_PixEnvL = new G4Box{ "Solid_PixEnvL", leng_X_PixEnvL / 2.0,
+                                   leng_Y_PixEnvL / 2.0, leng_Z_PixEnvL / 2.0 };
 
    // Define logical volume of the local envelop
    G4Material* materi_PixEnvL = materi_Man->FindOrBuildMaterial( "G4_WATER" );
@@ -84,12 +84,12 @@
 
 // Define 'Pixel Detector' - Pixel Element (divided the local envelop in X-direction)
    // Define the shape of the pixel element
-   G4int nDiv_X = 61;                                   // Number of divisions in X-direction
-   G4double leng_X_PixElmt = leng_X_PixEnvG/nDiv_X;    // X-full-length of pixel: pixel element
-   G4double leng_Y_PixElmt = leng_Y_PixEnvG/nDiv_Y;    // Y-full-length of pixel: pixel element
+   G4int nDiv_X = 5; //61                                  // Number of divisions in X-direction
+   G4double leng_X_PixElmt = leng_X_PixEnvG / nDiv_X;    // X-full-length of pixel: pixel element
+   G4double leng_Y_PixElmt = leng_Y_PixEnvG / nDiv_Y;    // Y-full-length of pixel: pixel element
    G4double leng_Z_PixElmt = leng_Z_PixEnvG;           // Z-full-length of pixel: pixel element
-   auto solid_PixElmt = new G4Box{ "Solid_PixElmt", leng_X_PixElmt/2.0,
-                                   leng_Y_PixElmt/2.0, leng_Z_PixElmt/2.0 };
+   auto solid_PixElmt = new G4Box{ "Solid_PixElmt", leng_X_PixElmt / 2.0,
+                                   leng_Y_PixElmt / 2.0, leng_Z_PixElmt / 2.0 };
 
    // Define logical volume of the pixel element
    G4Material* materi_PixElmt = materi_Man->FindOrBuildMaterial( "G4_WATER" );
@@ -102,12 +102,12 @@
 
 // Define 'Pixel Detector' - Pixel Element (divided the local envelop in Z-direction)
    // Define the shape of the pixel element
-   G4int nDiv_Z = 150;                                  // Number of divisions in Z-direction
-   G4double leng_X_PixElmts = leng_X_PixEnvG/nDiv_X;    // X-full-length of pixel: pixel element
-   G4double leng_Y_PixElmts = leng_Y_PixEnvG/nDiv_Y;    // Y-full-length of pixel: pixel element
-   G4double leng_Z_PixElmts = leng_Z_PixEnvG/nDiv_Z;    // Z-full-length of pixel: pixel element
-   auto solid_PixElmts = new G4Box{ "Solid_PixElmts", leng_X_PixElmts/2.0,
-                                   leng_Y_PixElmts/2.0, leng_Z_PixElmts/2.0 };
+   G4int nDiv_Z = 15; //150                                 // Number of divisions in Z-direction
+   G4double leng_X_PixElmts = leng_X_PixEnvG / nDiv_X;    // X-full-length of pixel: pixel element
+   G4double leng_Y_PixElmts = leng_Y_PixEnvG / nDiv_Y;    // Y-full-length of pixel: pixel element
+   G4double leng_Z_PixElmts = leng_Z_PixEnvG / nDiv_Z;    // Z-full-length of pixel: pixel element
+   auto solid_PixElmts = new G4Box{ "Solid_PixElmts", leng_X_PixElmts / 2.0,
+                                   leng_Y_PixElmts / 2.0, leng_Z_PixElmts / 2.0 };
 
    // Define logical volume of the pixel element
    G4Material* materi_PixElmts = materi_Man->FindOrBuildMaterial( "G4_WATER" );
@@ -119,9 +119,9 @@
                     nDiv_Z, leng_Z_PixElmts };
 
 // Placement of the 'Pixel Detector' to the world: Put the 'global envelop'
-   G4double pos_X_LogV_PixEnvG = 0.0*cm;       // X-location LogV_PixEnvG
-   G4double pos_Y_LogV_PixEnvG = 0.0*cm;       // Y-location LogV_PixEnvG
-   G4double pos_Z_LogV_PixEnvG = 70.0*cm;       // Z-location LogV_PixEnvG
+   G4double pos_X_LogV_PixEnvG = 0.0 * cm;       // X-location LogV_PixEnvG
+   G4double pos_Y_LogV_PixEnvG = 0.0 * cm;       // Y-location LogV_PixEnvG
+   G4double pos_Z_LogV_PixEnvG = 115.5 * cm;       // Z-location LogV_PixEnvG
    auto threeVect_LogV_PixEnvG = G4ThreeVector{ pos_X_LogV_PixEnvG,
                                        pos_Y_LogV_PixEnvG, pos_Z_LogV_PixEnvG };
    auto rotMtrx_LogV_PixEnvG = G4RotationMatrix{};
