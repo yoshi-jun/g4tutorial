@@ -21,6 +21,8 @@ class G4Step;
 private:
     G4double sum_eDep;
     G4double sum_stepLength;
+    std::vector<double> layer_edeps;
+    int i;
 
 
 };
