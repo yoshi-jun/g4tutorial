@@ -21,6 +21,7 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // SensitiveVolume.cc
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,8 +56,7 @@
           << " stepLength = " << G4BestUnit(sum_stepLength, "Length") 
 	  << G4endl;
 
-    //out put csv data 
-    
+
 
 }
 //------------------------------------------------------------------------------
@@ -65,7 +65,14 @@
     G4double edep = aStep-> GetTotalEnergyDeposit();
     G4double stepLength = aStep-> GetStepLength();
 
-    layer_edeps.push_back(aStep-> GetTotalEnergyDeposit());
+    //Score_Edeps::Score_edep.at(0).at(0).at(0) = edep;
+
+    //layer_edeps.push_back(aStep-> GetTotalEnergyDeposit());
+
+    //make Scorer
+    Score_Edeps *Score_Edeps = Score_Edeps::GetInstance();
+    //stack edep to scorer
+    Score_Edeps-> AddScoreData(0,0,0,edep);
 
 	sum_eDep = sum_eDep + edep; 
   sum_stepLength = sum_stepLength + stepLength;

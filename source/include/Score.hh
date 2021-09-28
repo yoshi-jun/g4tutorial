@@ -27,33 +27,48 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifndef Score_h
 #define Score_h 1
+
+#include <iostream>
+#include <vector>
+#include <fstream>
+
 class Score_Edeps
 {
     private:
-        ~Score_Edeps();
-        
-        Score_Edeps();
+        Score_Edeps()= default;
 
-        static std::vector<std::vector<std::vector<double>>> Score_edep;
+        ~Score_Edeps() = default;
 
+        static Score_Edeps *instance;
+    
     public:
-        
-        static auto pointer;
 
-        void GetScorerPointer(){
 
-            return pointer;
-        
+        static Score_Edeps *GetInstance(){
+
+            return instance;
         }
 
-        void AddScoreData();
+        static void CreateInstance();
+        static void DeleteInstance();
+        static void AddScoreData(int x,int y, int z, double data);
+        static void CoutData();
 
-        static  Score_Edeps& GetInstance(){
-            
-            static Score_Edeps pointer;
+        static std::vector<std::vector<std::vector<double>>> scores;
 
-            return pointer;
-        }
+        int a;
+        
+        
+        /*
+        void GetScorerPointer();
+
+        void AddScoreData(int x,int y,int z,double data);
+
+        void CoutData();
+
+        void MakeInstance(); // not made 
+
+        */
 
 
 };

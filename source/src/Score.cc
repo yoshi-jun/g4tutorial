@@ -27,21 +27,31 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #include"Score.hh"
 
-Score_Edeps::Score_Edeps(){
+Score_Edeps *Score_Edeps::instance = NULL;
 
+void Score_Edeps::CreateInstance()
+{
+
+    if(!instance){
+        instance = new Score_Edeps;
+    }
 }
 
-Score_Edeps::~Score_Edeps(){
+void Score_Edeps::DeleteInstance()
+{
 
     std::ofstream outdata("data.csv");
 
-    for (int i = 0; i < 61; i++ ){
+    for (int i = 0; i < int(Score_Edeps::scores.size()); i++ )
+    {
 
-        for (int j = 0; j < 61; j++ ){
+        for (int j = 0; j < int(Score_Edeps::scores.at(0).size()); j++ )
+        {
         
-            for (int k = 0; k < 150; k++ ){
+            for (int k = 0; k < int(Score_Edeps::scores.at(0).at(0).size()); k++ )
+            {
 
-                outdata << Score_edep.at(i).at(j).at(k) << "\n";
+                outdata << Score_Edeps::scores.at(i).at(j).at(k) << "\n";
             
             }
         }
@@ -49,10 +59,34 @@ Score_Edeps::~Score_Edeps(){
 
     outdata.close();
 
+    delete instance;
+
+    instance = NULL;
 }
 
-void AddScoreData(x,y,z,data){
+void AddScoreData(int x,int y,int z,double data)
+{
 
-    Score_edep.at(x).at(y).at(z) = data;
+    Score_Edeps::scores.at(x).at(y).at(z) = data;
+
+}
+
+void CoutData(){
+
+    for (int i = 0; i < int(Score_Edeps::scores.size()); i++ )
+    {
+
+        for (int j = 0; j < int(Score_Edeps::scores.at(0).size()); j++ )
+        {
+        
+            for (int k = 0; k < int(Score_Edeps::scores.at(0).at(0).size()); k++ )
+            {
+
+                std::cout << Score_Edeps::scores.at(i).at(j).at(k) << "\n" << std::endl;
+            
+            }
+        }
+    }
+
 
 }
