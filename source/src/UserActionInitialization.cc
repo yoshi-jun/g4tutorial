@@ -25,19 +25,23 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // UserActionInitialization.cc
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include "UserActionInitialization.hh"
-#include "PrimaryGenerator.hh"
+#include "user_action_initialization.h"
+#include "primary_generator.h"
 
 //------------------------------------------------------------------------------
   UserActionInitialization::UserActionInitialization()
-  : G4VUserActionInitialization{}
+  : G4VUserActionInitialization
+  {
+  }
 //------------------------------------------------------------------------------
-{}
+{
+}
 
 //------------------------------------------------------------------------------
   UserActionInitialization::~UserActionInitialization()
 //------------------------------------------------------------------------------
-{}
+{
+}
 
 //------------------------------------------------------------------------------
   void UserActionInitialization::Build() const

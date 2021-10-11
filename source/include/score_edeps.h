@@ -21,28 +21,51 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#ifndef SCORE_EDEPS_H_
+#define SCORE_EDEPS_H_
 
-#include "primary_generator.h"
-#include "G4ParticleGun.hh"
+#include <string>
+#include <vector>
 
-//------------------------------------------------------------------------------
-  PrimaryGenerator::PrimaryGenerator()
-  : fpParticleGun{ nullptr }
-//------------------------------------------------------------------------------
+class ScoreEdeps {
+
+public:
+  ~ScoreEdeps() = default;
+
+  ScoreEdeps(const ScoreEdeps&) = delete;
+  ScoreEdeps& operator=(const ScoreEdeps&) = delete;
+
+  static ScoreEdeps* GetInstance();
+
+  void SetDimensions(int nx, int ny, int nz);
+
+  void InitializeDose();
+  void AddDose(int ix, int iy ,int iz, double val);
+  void StacDose(int num, double val);
+
+  void Print() const;
+  void SaveToFile(const std::string& filename) const;
+
+
+private:
+  ScoreEdeps();
+
+  int nx_;
+  int ny_;
+  int nz_;
+
+  std::vector<double> dose_list_;
+
+
+};
+
+// ===========================================================================
+
+inline void ScoreEdeps::SetDimensions(int nx, int ny, int nz)
 {
-  fpParticleGun = new G4ParticleGun{};
+  nx_ = nx;
+  ny_ = ny;
+  nz_ = nz;
 }
 
-//------------------------------------------------------------------------------
-  PrimaryGenerator::~PrimaryGenerator()
-//------------------------------------------------------------------------------
-{
-  delete fpParticleGun;
-}
-
-//------------------------------------------------------------------------------
-  void PrimaryGenerator::GeneratePrimaries( G4Event* anEvent )
-//------------------------------------------------------------------------------
-{
-  fpParticleGun->GeneratePrimaryVertex( anEvent );
-}
+#endif

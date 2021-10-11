@@ -25,63 +25,62 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // SensitiveVolume.cc
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include "SensitiveVolume.hh"
 #include "G4TouchableHistory.hh"
 #include "G4Track.hh"
 #include "G4Step.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4HCofThisEvent.hh"
-
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
-#include "Score.hh"
 
+#include "sensitive_volume.h"
 //------------------------------------------------------------------------------
   SensitiveVolume::SensitiveVolume(G4String name)
   : G4VSensitiveDetector(name)
-{}
+{
+
+}
+
 //------------------------------------------------------------------------------
   SensitiveVolume::~SensitiveVolume()
-{}
+{
+
+}
+
 //------------------------------------------------------------------------------
   void SensitiveVolume::Initialize(G4HCofThisEvent*)
 {
-     sum_eDep = 0.;
-     sum_stepLength =0.; 
+  sum_eDep = 0.;
+  sum_stepLength =0.;
 }
+
 //------------------------------------------------------------------------------
   void SensitiveVolume::EndOfEvent(G4HCofThisEvent*)
 {
-   G4cout <<  " eDep = "<< G4BestUnit(sum_eDep, "Energy")
-          << " stepLength = " << G4BestUnit(sum_stepLength, "Length") 
-	  << G4endl;
-
-
+  std::cout <<  " eDep = "<< G4BestUnit(sum_eDep, "Energy")
+            << " stepLength = " << G4BestUnit(sum_stepLength, "Length")
+            << std::endl;
 
 }
+
 //------------------------------------------------------------------------------
   G4bool SensitiveVolume::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
-    G4double edep = aStep-> GetTotalEnergyDeposit();
-    G4double stepLength = aStep-> GetStepLength();
+  auto edep = aStep-> GetTotalEnergyDeposit();
+  auto stepLength = aStep-> GetStepLength();
 
-    //Score_Edeps::Score_edep.at(0).at(0).at(0) = edep;
+  auto copyNum = aStep-> GetPreStepPoint()-> GetPhysicalVolume()-> GetCopyNo();
 
-    //layer_edeps.push_back(aStep-> GetTotalEnergyDeposit());
+  auto dose_score = ScoreEdeps::GetInstance();
+  dose_score-> SetDimensions(61, 61, 150);
+  dose_score-> InitializeDose();
+  dose_score->StacDose(copyNum, edep);
 
-    //make Scorer
-    Score_Edeps *Score_Edeps = Score_Edeps::GetInstance();
-    //stack edep to scorer
-    Score_Edeps-> AddScoreData(0,0,0,edep);
+  dose_score-> SaveToFile("test.csv");
 
-	sum_eDep = sum_eDep + edep; 
+  std::cout << copyNum << std::endl;
+	sum_eDep = sum_eDep + edep;
   sum_stepLength = sum_stepLength + stepLength;
 
   return true;
 }
-
-
-
-
-
-

@@ -21,19 +21,14 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Geant4 Application: Tutorial course for Hep/Medicine Users
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include "Geometry.hh"
-#include "UserActionInitialization.hh"
-
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
 #include "FTFP_BERT.hh"
 
+#include "geometry.h"
+#include "user_action_initialization.h"
 //-------------------------------------------------------------------------------
   int main( int argc, char** argv )
 //-------------------------------------------------------------------------------
@@ -72,11 +67,11 @@
 
 // Start interactive session
    auto uiExec = new G4UIExecutive( argc, argv );
-   
+
    G4UImanager*  uiManager = G4UImanager::GetUIpointer();
 
-   //controll visual 
-   uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
+   //controll visual
+   //uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
 
    uiExec->SessionStart();
 

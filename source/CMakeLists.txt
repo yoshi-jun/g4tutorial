@@ -1,5 +1,5 @@
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CMakeLists.txt: Geant4 Tutorial for Hep/Medicine Users (2016.11.29 @Sendai)  
+# CMakeLists.txt: Geant4 Tutorial for Hep/Medicine Users (2016.11.29 @Sendai)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
@@ -15,8 +15,8 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 #----------------------------------------------------------------------------
 # Intact Section: You don't need to touch the following part
 #----------------------------------------------------------------------------
-# Set the project name 
-  project( ${NAME_MAIN_PROGRAM} ) 
+# Set the project name
+  project( ${NAME_MAIN_PROGRAM} )
 
 # Find Geant4 package
   option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
@@ -32,10 +32,10 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 # Locate sources and headers for this project
   file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
-  file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
+  file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.h)
 
 # Compile and link your application
-  add_executable(${NAME_MAIN_PROGRAM} ${NAME_MAIN_PROGRAM}.cc 
+  add_executable(${NAME_MAIN_PROGRAM} ${NAME_MAIN_PROGRAM}.cc
                                       ${sources} ${headers})
   target_link_libraries(${NAME_MAIN_PROGRAM} ${Geant4_LIBRARIES})
 

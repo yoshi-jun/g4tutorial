@@ -21,72 +21,86 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#include <fstream>
+#include <iostream>
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Source.cc
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include"Score.hh"
+#include "score_edeps.h"
 
-Score_Edeps *Score_Edeps::instance = NULL;
-
-void Score_Edeps::CreateInstance()
+//----------------------------------------------------------------------------
+ScoreEdeps::ScoreEdeps()
+  : nx_{1}, ny_{1}, nz_{1}
 {
-
-    if(!instance){
-        instance = new Score_Edeps;
-    }
 }
 
-void Score_Edeps::DeleteInstance()
+//----------------------------------------------------------------------------
+ScoreEdeps* ScoreEdeps::GetInstance()
 {
+  static ScoreEdeps the_score_edeps;
 
-    std::ofstream outdata("data.csv");
-
-    for (int i = 0; i < int(Score_Edeps::scores.size()); i++ )
-    {
-
-        for (int j = 0; j < int(Score_Edeps::scores.at(0).size()); j++ )
-        {
-        
-            for (int k = 0; k < int(Score_Edeps::scores.at(0).at(0).size()); k++ )
-            {
-
-                outdata << Score_Edeps::scores.at(i).at(j).at(k) << "\n";
-            
-            }
-        }
-    }
-
-    outdata.close();
-
-    delete instance;
-
-    instance = NULL;
+  return &the_score_edeps;
 }
 
-void AddScoreData(int x,int y,int z,double data)
+//----------------------------------------------------------------------------
+void ScoreEdeps::InitializeDose()
 {
-
-    Score_Edeps::scores.at(x).at(y).at(z) = data;
-
+  dose_list_.resize(nx_ * ny_ * nz_, 0.);
 }
 
-void CoutData(){
+//----------------------------------------------------------------------------
+void ScoreEdeps::AddDose(int ix, int iy, int iz, double val)
+{
+  auto idx = ix + iy * nx_ + iz * nx_ * ny_;
 
-    for (int i = 0; i < int(Score_Edeps::scores.size()); i++ )
-    {
+  dose_list_[idx] += val;
+}
 
-        for (int j = 0; j < int(Score_Edeps::scores.at(0).size()); j++ )
-        {
-        
-            for (int k = 0; k < int(Score_Edeps::scores.at(0).at(0).size()); k++ )
-            {
+//----------------------------------------------------------------------------
+void ScoreEdeps::StacDose(int num, double val)
+{
+  dose_list_[num] += val;
+}
 
-                std::cout << Score_Edeps::scores.at(i).at(j).at(k) << "\n" << std::endl;
-            
-            }
-        }
+//----------------------------------------------------------------------------
+void ScoreEdeps::Print() const
+{
+  for ( int k = 0; k < nz_; k++ ) {
+    for ( int j = 0; j < ny_; j++ ) {
+      for ( int i = 0; i < nx_; i++ ) {
+
+        int idx = i + j * nx_ + k * nx_ * ny_;
+
+        std::cout << dose_list_ [idx] << "," ;
+
+      }
+
+      std::cout << std::endl;
     }
 
+    for (int n = 0; n < nx_; n++) {
+      std::cout << "-" ;
+    }
+    std::cout << std::endl;
+    std::cout << "z = " << k << std::endl;
+  }
+}
 
+//----------------------------------------------------------------------------
+void ScoreEdeps::SaveToFile(const std::string &filename) const
+{
+  std::ofstream dose_file_(filename, std::ios::out);
+
+  dose_file_ << "ix, iy, iz, dose" << std::endl;
+
+  for ( int k = 0; k < nz_; k++ ) {
+    for ( int j = 0; j < ny_; j++ ) {
+      for ( int i = 0; i < nx_; i++ ) {
+
+        auto idx = i + j * nx_ + k * nx_ * ny_;
+
+        dose_file_ << i << "," << j << ","<< k << "," << dose_list_ [idx]
+                   <<std::endl;
+      }
+    }
+  }
+  dose_file_.close();
 }

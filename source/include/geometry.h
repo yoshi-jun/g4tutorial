@@ -21,28 +21,20 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 
-#include "primary_generator.h"
-#include "G4ParticleGun.hh"
+#include "G4VUserDetectorConstruction.hh"
+class G4VPhysicalVolume;
 
 //------------------------------------------------------------------------------
-  PrimaryGenerator::PrimaryGenerator()
-  : fpParticleGun{ nullptr }
+  class Geometry : public G4VUserDetectorConstruction
 //------------------------------------------------------------------------------
 {
-  fpParticleGun = new G4ParticleGun{};
-}
+  public:
+    Geometry();
+   ~Geometry();
 
-//------------------------------------------------------------------------------
-  PrimaryGenerator::~PrimaryGenerator()
-//------------------------------------------------------------------------------
-{
-  delete fpParticleGun;
-}
-
-//------------------------------------------------------------------------------
-  void PrimaryGenerator::GeneratePrimaries( G4Event* anEvent )
-//------------------------------------------------------------------------------
-{
-  fpParticleGun->GeneratePrimaryVertex( anEvent );
-}
+    G4VPhysicalVolume* Construct();
+};
+#endif

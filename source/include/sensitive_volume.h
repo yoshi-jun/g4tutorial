@@ -21,28 +21,28 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#ifndef SENSITIVEVOLUME_H
+#define SENSITIVEVOLUME_H
 
-#include "primary_generator.h"
-#include "G4ParticleGun.hh"
+#include "G4VSensitiveDetector.hh"
+#include "score_edeps.h"
+class G4Step;
 
 //------------------------------------------------------------------------------
-  PrimaryGenerator::PrimaryGenerator()
-  : fpParticleGun{ nullptr }
+  class SensitiveVolume : public G4VSensitiveDetector
 //------------------------------------------------------------------------------
 {
-  fpParticleGun = new G4ParticleGun{};
-}
+public:
+  SensitiveVolume(G4String);
+  ~SensitiveVolume();
 
-//------------------------------------------------------------------------------
-  PrimaryGenerator::~PrimaryGenerator()
-//------------------------------------------------------------------------------
-{
-  delete fpParticleGun;
-}
+  void Initialize(G4HCofThisEvent*);
+  G4bool ProcessHits(G4Step*, G4TouchableHistory*);
+  void EndOfEvent(G4HCofThisEvent*);
+private:
+  G4double sum_eDep;
+  G4double sum_stepLength;
 
-//------------------------------------------------------------------------------
-  void PrimaryGenerator::GeneratePrimaries( G4Event* anEvent )
-//------------------------------------------------------------------------------
-{
-  fpParticleGun->GeneratePrimaryVertex( anEvent );
-}
+
+};
+#endif

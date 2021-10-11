@@ -21,28 +21,25 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#ifndef PRIMARYGENERATOR_H
+#define PRIMARYGENERATOR_H
 
-#include "primary_generator.h"
-#include "G4ParticleGun.hh"
+#include "G4VUserPrimaryGeneratorAction.hh"
+class G4Event;
+class G4ParticleGun;
 
 //------------------------------------------------------------------------------
-  PrimaryGenerator::PrimaryGenerator()
-  : fpParticleGun{ nullptr }
+  class PrimaryGenerator : public G4VUserPrimaryGeneratorAction
 //------------------------------------------------------------------------------
 {
-  fpParticleGun = new G4ParticleGun{};
-}
+  public:
+    PrimaryGenerator();
+   ~PrimaryGenerator();
 
-//------------------------------------------------------------------------------
-  PrimaryGenerator::~PrimaryGenerator()
-//------------------------------------------------------------------------------
-{
-  delete fpParticleGun;
-}
+  public:
+    void GeneratePrimaries( G4Event* );
 
-//------------------------------------------------------------------------------
-  void PrimaryGenerator::GeneratePrimaries( G4Event* anEvent )
-//------------------------------------------------------------------------------
-{
-  fpParticleGun->GeneratePrimaryVertex( anEvent );
-}
+  private:
+    G4ParticleGun* fpParticleGun;
+};
+#endif
