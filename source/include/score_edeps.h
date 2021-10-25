@@ -24,6 +24,7 @@
 #ifndef SCORE_EDEPS_H_
 #define SCORE_EDEPS_H_
 
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -37,15 +38,23 @@ public:
 
   static ScoreEdeps* GetInstance();
 
+  void SetDimention(char m, int n);
   void SetDimensions(int nx, int ny, int nz);
+
+  void CountEvent();
+  int GetEventTimes() const;
 
   void InitializeDose();
   void AddDose(int ix, int iy ,int iz, double val);
-  void StacDose(int num, double val);
 
-  void Print() const;
+  void Print() const;// can print a event only
   void SaveToFile(const std::string& filename) const;
 
+  void AddPoint(double point_x, double point_y);
+  void SavePoint(const std::string& filename) const;
+
+  void AddCos(double val);
+  void SaveCos(const std::string& filename) const;
 
 private:
   ScoreEdeps();
@@ -54,18 +63,58 @@ private:
   int ny_;
   int nz_;
 
-  std::vector<double> dose_list_;
+  int event_counter_;
 
+  std::vector<double> dose_list_;
+  std::vector<double> points_list_x_;
+  std::vector<double> points_list_y_;
+  std::vector<double> rand_cos_list_;
 
 };
 
 // ===========================================================================
-
+inline void ScoreEdeps::SetDimention(char m, int n)
+{
+  //set dimension m n
+}
+//-----------------------------------------------------------------------------
 inline void ScoreEdeps::SetDimensions(int nx, int ny, int nz)
 {
   nx_ = nx;
   ny_ = ny;
   nz_ = nz;
+}
+
+//-----------------------------------------------------------------------------
+inline void ScoreEdeps::CountEvent()
+{
+  event_counter_ = event_counter_ + 1;
+}
+
+//-----------------------------------------------------------------------------
+inline int ScoreEdeps::GetEventTimes() const
+{
+  return event_counter_ ;
+}
+
+//----------------------------------------------------------------------------
+inline void ScoreEdeps::AddCos(double val)
+{
+  rand_cos_list_.push_back(val);
+}
+
+//----------------------------------------------------------------------------
+inline void ScoreEdeps::SaveCos(const std::string& filename) const
+{
+ std::ofstream file_pt(filename, std::ios::out);
+
+ for (int i = 0; i < rand_cos_list_.size(); i++) {
+
+   file_pt << rand_cos_list_[i] << std::endl;
+
+ }
+
+ file_pt.close();
 }
 
 #endif

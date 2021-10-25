@@ -22,9 +22,6 @@
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// SensitiveVolume.cc
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #include "G4TouchableHistory.hh"
 #include "G4Track.hh"
 #include "G4Step.hh"
@@ -57,9 +54,18 @@
 //------------------------------------------------------------------------------
   void SensitiveVolume::EndOfEvent(G4HCofThisEvent*)
 {
-  std::cout <<  " eDep = "<< G4BestUnit(sum_eDep, "Energy")
-            << " stepLength = " << G4BestUnit(sum_stepLength, "Length")
-            << std::endl;
+  auto dose_score = ScoreEdeps::GetInstance();
+
+  dose_score-> CountEvent();
+  auto events = dose_score -> GetEventTimes();
+
+  if ( events % 10000 == 0){
+    std::cout << "================================================" << std::endl
+              << "              The end of this event      "
+              << events << std::endl
+              << "================================================" << std::endl
+              << std::endl;
+  }
 
 }
 
@@ -69,16 +75,24 @@
   auto edep = aStep-> GetTotalEnergyDeposit();
   auto stepLength = aStep-> GetStepLength();
 
-  auto copyNum = aStep-> GetPreStepPoint()-> GetPhysicalVolume()-> GetCopyNo();
+  auto copyNum_z = aStep-> GetPreStepPoint()-> GetTouchableHandle()
+                      -> GetCopyNumber(0);
+
+  auto copyNum_y = aStep-> GetPreStepPoint()-> GetTouchableHandle()
+                      -> GetCopyNumber(1);
+
+  auto copyNum_x = aStep-> GetPreStepPoint()-> GetTouchableHandle()
+                      -> GetCopyNumber(2);
 
   auto dose_score = ScoreEdeps::GetInstance();
-  dose_score-> SetDimensions(61, 61, 150);
-  dose_score-> InitializeDose();
-  dose_score->StacDose(copyNum, edep);
 
-  dose_score-> SaveToFile("test.csv");
+  auto souce_score = ScoreEdeps::GetInstance();
 
-  std::cout << copyNum << std::endl;
+  if (copyNum_z == 0) {
+    souce_score-> AddPoint(copyNum_x, copyNum_y);
+  }
+  dose_score-> AddDose(copyNum_x, copyNum_y, copyNum_z, edep);
+
 	sum_eDep = sum_eDep + edep;
   sum_stepLength = sum_stepLength + stepLength;
 

@@ -24,12 +24,15 @@
 #include <fstream>
 #include <iostream>
 
+#include "G4SystemOfUnits.hh"
+
 #include "score_edeps.h"
 
 //----------------------------------------------------------------------------
 ScoreEdeps::ScoreEdeps()
   : nx_{1}, ny_{1}, nz_{1}
 {
+  event_counter_ = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -43,21 +46,15 @@ ScoreEdeps* ScoreEdeps::GetInstance()
 //----------------------------------------------------------------------------
 void ScoreEdeps::InitializeDose()
 {
-  dose_list_.resize(nx_ * ny_ * nz_, 0.);
+  dose_list_.resize(nx_ * ny_ * nz_ , 0.);
 }
 
 //----------------------------------------------------------------------------
 void ScoreEdeps::AddDose(int ix, int iy, int iz, double val)
 {
-  auto idx = ix + iy * nx_ + iz * nx_ * ny_;
+  auto idx = ix + iy * nx_ + iz * nx_ * ny_ ;
 
-  dose_list_[idx] += val;
-}
-
-//----------------------------------------------------------------------------
-void ScoreEdeps::StacDose(int num, double val)
-{
-  dose_list_[num] += val;
+  dose_list_[idx] += val / MeV;
 }
 
 //----------------------------------------------------------------------------
@@ -69,7 +66,7 @@ void ScoreEdeps::Print() const
 
         int idx = i + j * nx_ + k * nx_ * ny_;
 
-        std::cout << dose_list_ [idx] << "," ;
+        std::cout << dose_list_ [idx] / MeV << "," ;
 
       }
 
@@ -89,18 +86,41 @@ void ScoreEdeps::SaveToFile(const std::string &filename) const
 {
   std::ofstream dose_file_(filename, std::ios::out);
 
-  dose_file_ << "ix, iy, iz, dose" << std::endl;
+  dose_file_ << "ix,iy,iz,dose" << std::endl;
+
 
   for ( int k = 0; k < nz_; k++ ) {
     for ( int j = 0; j < ny_; j++ ) {
       for ( int i = 0; i < nx_; i++ ) {
 
-        auto idx = i + j * nx_ + k * nx_ * ny_;
+        auto idx = i + j * nx_ + k * nx_ * ny_ ;
 
-        dose_file_ << i << "," << j << ","<< k << "," << dose_list_ [idx]
+        dose_file_ << i << "," << j << ","<< k << "," << dose_list_ [idx] / MeV
                    <<std::endl;
       }
     }
   }
   dose_file_.close();
+}
+//----------------------------------------------------------------------------
+void ScoreEdeps::AddPoint(double point_x, double point_y)
+{
+  points_list_x_.push_back(point_x);
+  points_list_y_.push_back(point_y);
+}
+
+//----------------------------------------------------------------------------
+void ScoreEdeps::SavePoint(const std::string& filename) const
+{
+  std::ofstream point_file(filename, std::ios::out);
+
+  point_file << "x,y,z" << std::endl;
+
+  for (int i = 0; i < points_list_x_.size(); i++) {
+
+    point_file << points_list_x_[i] << "," << points_list_y_[i] << std::endl;
+
+  }
+
+  point_file.close();
 }

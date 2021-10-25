@@ -57,6 +57,11 @@
    G4double leng_X_World = 100.0 * cm;         // X-full-length of world
    G4double leng_Y_World = 100.0 * cm;         // Y-full-length of world
    G4double leng_Z_World = 300.0 * cm;         // Z-full-length of world
+
+   G4int nDiv_X = 61;
+   G4int nDiv_Y = 61;
+   G4int nDiv_Z = 150;
+
    auto solid_World = new G4Box{ "Solid_World",
                          leng_X_World/2.0, leng_Y_World/2.0, leng_Z_World/2.0 };
 
@@ -87,9 +92,9 @@
 
 // Define 'Pixel Detector'-Local Envelop (divided the global envelop in Y-direction)
    // Define the shape of the local envelop
-   G4int nDiv_Y = 61;
-   G4double leng_X_PixEnvL = leng_X_PixEnvG;
-   G4double leng_Y_PixEnvL = leng_Y_PixEnvG / nDiv_Y;
+
+   G4double leng_X_PixEnvL = leng_X_PixEnvG / nDiv_X;
+   G4double leng_Y_PixEnvL = leng_Y_PixEnvG;
    G4double leng_Z_PixEnvL = leng_Z_PixEnvG;
    auto solid_PixEnvL = new G4Box{ "Solid_PixEnvL", leng_X_PixEnvL / 2.0,
                                    leng_Y_PixEnvL / 2.0, leng_Z_PixEnvL / 2.0 };
@@ -100,12 +105,12 @@
                                               "LogVol_PixEnvL" };
 
    // Placement of the local envelop to the global envelop using Replica
-   new G4PVReplica{ "PhysVol_PixEnvL", logVol_PixEnvL, logVol_PixEnvG, kYAxis,
-                    nDiv_Y, leng_Y_PixEnvL };
+   new G4PVReplica{ "PhysVol_PixEnvL", logVol_PixEnvL, logVol_PixEnvG, kXAxis,
+                    nDiv_X, leng_X_PixEnvL };
 
 // Define 'Pixel Detector' - Pixel Element (divided the local envelop in X-direction)
    // Define the shape of the pixel element
-   G4int nDiv_X = 61;
+
    G4double leng_X_PixElmt = leng_X_PixEnvG / nDiv_X;
    G4double leng_Y_PixElmt = leng_Y_PixEnvG / nDiv_Y;
    G4double leng_Z_PixElmt = leng_Z_PixEnvG;
@@ -118,12 +123,12 @@
                                               "LogVol_PixElmt" };
 
    // Placement of pixel elements to the local envelop using Replica
-   new G4PVReplica{ "PhysVol_PixElmt", logVol_PixElmt, logVol_PixEnvL, kXAxis,
-                    nDiv_X, leng_X_PixElmt };
+   new G4PVReplica{ "PhysVol_PixElmt", logVol_PixElmt, logVol_PixEnvL, kYAxis,
+                    nDiv_Y, leng_Y_PixElmt };
 
 // Define 'Pixel Detector' - Pixel Element (divided the local envelop in Z-direction)
    // Define the shape of the pixel element
-   G4int nDiv_Z = 150;
+
    G4double leng_X_PixElmts = leng_X_PixEnvG / nDiv_X;
    G4double leng_Y_PixElmts = leng_Y_PixEnvG / nDiv_Y;
    G4double leng_Z_PixElmts = leng_Z_PixEnvG / nDiv_Z;
@@ -139,24 +144,31 @@
    new G4PVReplica{ "PhysVol_PixElmts", logVol_PixElmts, logVol_PixElmt, kZAxis,
                     nDiv_Z, leng_Z_PixElmts };
 
+//=============================================================================
 // Placement of the 'Pixel Detector' to the world: Put the 'global envelop'
    G4double pos_X_LogV_PixEnvG = 0.0 * cm;
    G4double pos_Y_LogV_PixEnvG = 0.0 * cm;
    G4double pos_Z_LogV_PixEnvG = 115.5 * cm;
+
    auto threeVect_LogV_PixEnvG = G4ThreeVector{ pos_X_LogV_PixEnvG,
                                        pos_Y_LogV_PixEnvG, pos_Z_LogV_PixEnvG };
    auto rotMtrx_LogV_PixEnvG = G4RotationMatrix{};
-   auto trans3D_LogV_PixEnvG = G4Transform3D{ rotMtrx_LogV_PixEnvG, threeVect_LogV_PixEnvG };
+   auto trans3D_LogV_PixEnvG = G4Transform3D{ rotMtrx_LogV_PixEnvG,
+                                              threeVect_LogV_PixEnvG };
 
    G4int copyNum_LogV_PixEnvG = 1000;          // Set ID number of LogV_PixEnvG
-   new G4PVPlacement{ trans3D_LogV_PixEnvG, "PhysVol_PixEnvG", logVol_PixEnvG, physVol_World,
-                      false, copyNum_LogV_PixEnvG };
+   new G4PVPlacement{ trans3D_LogV_PixEnvG, "PhysVol_PixEnvG", logVol_PixEnvG,
+                      physVol_World, false, copyNum_LogV_PixEnvG };
 
 // Sensitive volume
     auto aSV = new SensitiveVolume("SensitiveVolume");
     logVol_PixElmts-> SetSensitiveDetector(aSV);
     auto SDman = G4SDManager::GetSDMpointer();
     SDman->AddNewDetector(aSV);
+
+
+   auto dose_score = ScoreEdeps::GetInstance();
+    dose_score-> SetDimensions(nDiv_X, nDiv_Y, nDiv_Z);
 
 // Return the physical world
    return physVol_World;

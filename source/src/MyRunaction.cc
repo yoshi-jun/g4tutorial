@@ -21,39 +21,40 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#include<iostream>
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// UserActionInitialization.cc
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include <iostream>
-
-#include "broad_generator.h"
 #include "my_runaction.h"
-#include "primary_generator.h"
-#include "user_action_initialization.h"
+#include "score_edeps.h"
 
-
-//------------------------------------------------------------------------------
-  UserActionInitialization::UserActionInitialization()
-  : G4VUserActionInitialization
-  {
-  }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+MyRunaction::MyRunaction()
 {
 }
 
-//------------------------------------------------------------------------------
-  UserActionInitialization::~UserActionInitialization()
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+MyRunaction::~MyRunaction()
 {
 }
 
-//------------------------------------------------------------------------------
-  void UserActionInitialization::Build() const
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void MyRunaction::BeginOfRunAction(const G4Run *)
 {
-  SetUserAction( new BroadGenerator{});
-  //SetUserAction( new PencilbeamGenerator{});
-  SetUserAction( new MyRunaction );
+    auto dose_score = ScoreEdeps::GetInstance();
+    dose_score-> InitializeDose();
+
+    std::cout << "00000000000000000000000000000000000" << std::endl
+              << "             begin run" << std::endl
+              << "00000000000000000000000000000000000" << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+void MyRunaction::EndOfRunAction(const G4Run *)
+{
+  auto score_edeps = ScoreEdeps::GetInstance();
+  score_edeps-> SaveToFile("data/broadbeam.csv");
+  score_edeps-> SavePoint("data/DitPts_broadbeam.csv");
+  std::cout << "00000000000000000000000000000000000" << std::endl
+            << "               end run" << std::endl
+            << "00000000000000000000000000000000000" << std::endl;
 
 }

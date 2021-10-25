@@ -33,21 +33,21 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
-#include "primary_generator.h"
+#include "broad_generator.h"
 #include "score_edeps.h"
 
 //------------------------------------------------------------------------------
-  PencilbeamGenerator::PencilbeamGenerator()
+  BroadGenerator::BroadGenerator()
 {
 }
 
 //------------------------------------------------------------------------------
-  PencilbeamGenerator::~PencilbeamGenerator()
+  BroadGenerator::~BroadGenerator()
 {
 }
 
 //------------------------------------------------------------------------------
-  void PencilbeamGenerator::GeneratePrimaries( G4Event* anEvent )
+  void BroadGenerator::GeneratePrimaries( G4Event* anEvent )
 {
   //Get particle-talbe pointer
   G4ParticleTable* particle_table = G4ParticleTable::GetParticleTable();
@@ -55,41 +55,74 @@
   std::string aName = "e-";
   double momentam = 20.0 * MeV;
 
-  auto ssd = 100. * cm;
+  while (1) {
 
-  auto direc_x =  0.;
-  auto direc_y =  0.;
-  auto direc_z =  1.;
+    auto rand_cos = G4UniformRand();
+    auto rand_phi = G4UniformRand();
 
-  auto surface_time = ssd / direc_z;
+    const auto ssd = 100. * cm;
+    const auto radius = 5. * std::sqrt(2.) * cm;
+    const auto field_half_size = 5. * cm;
 
-  auto x_surface = direc_x * surface_time;
-  auto y_surface = direc_y * surface_time;
+    auto cos_theta_min = ssd / (std::sqrt(ssd * ssd + radius * radius));
 
-  //checke direction of pencil beam
-  // auto score_edeps = ScoreEdeps::GetInstance();
-  // score_edeps-> AddPoint(x_surface  ,y_surface );
+    auto cos_theta = (1. - cos_theta_min) * rand_cos + cos_theta_min;
+    auto phi = 2. * pi * rand_phi;
 
-  G4ThreeVector direction = {direc_x, direc_y, direc_z};
+    auto sin_theta = std::sqrt(1 - cos_theta * cos_theta);
 
-  G4ThreeVector momVec = momentam * direction;
+    auto direc_x = sin_theta * std::cos(phi);
+    auto direc_y = sin_theta * std::sin(phi);
+    auto direc_z = cos_theta;
 
-  auto particle_code = particle_table-> FindParticle(aName);
+    auto time_surface = ssd / direc_z;
 
-  auto primary_particle = new G4PrimaryParticle{ particle_code,
-                                            momVec.x(),
-                                            momVec.y(),
-                                            momVec.z()};
+    auto x_surface = direc_x * time_surface;
+    auto y_surface = direc_y * time_surface;
 
-  double pos_x = 0. * cm;
-  double pos_y = 0. * cm;
-  double pos_z = 0. * mm;
-  double time_zero = 0. * s;
+    if ( x_surface < field_half_size &&
+         x_surface > -field_half_size &&
+         y_surface < field_half_size &&
+         y_surface > -field_half_size)
+    {
 
-  auto primary_vertex = new G4PrimaryVertex{pos_x, pos_y, pos_z, time_zero};
+      auto souce_score = ScoreEdeps::GetInstance();
+      souce_score-> AddCos(cos_theta);
 
-  primary_vertex-> SetPrimary(primary_particle);
+      G4ThreeVector direction = {direc_x, direc_y, direc_z};
 
-  anEvent-> AddPrimaryVertex(primary_vertex);
+      // checke direction of broad beam
+      // auto souce_score = ScoreEdeps::GetInstance();
+      // souce_score-> AddPoint(x_surface, y_surface);
+
+      G4ThreeVector momVec = momentam * direction;
+
+      auto particle_code = particle_table-> FindParticle(aName);
+
+      auto primary_particle = new G4PrimaryParticle{ particle_code,
+                                                momVec.x(),
+                                                momVec.y(),
+                                                momVec.z()};
+
+      double pos_x = 0. * cm;
+      double pos_y = 0. * cm;
+      double pos_z = 0. * mm;
+      double time_zero = 0. * s;
+
+      auto primary_vertex = new G4PrimaryVertex{pos_x, pos_y, pos_z,
+                                                time_zero};
+
+      primary_vertex-> SetPrimary(primary_particle);
+
+      anEvent-> AddPrimaryVertex(primary_vertex);
+
+      break;
+
+    };
+
+  };
+
+
+
 
 }

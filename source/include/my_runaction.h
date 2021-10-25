@@ -21,39 +21,20 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#ifndef MY_RUNACTION_
+#define MY_RUNACTION_
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// UserActionInitialization.cc
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include <iostream>
+#include "G4UserRunAction.hh"
 
-#include "broad_generator.h"
-#include "my_runaction.h"
-#include "primary_generator.h"
-#include "user_action_initialization.h"
+class G4Run;
 
-
-//------------------------------------------------------------------------------
-  UserActionInitialization::UserActionInitialization()
-  : G4VUserActionInitialization
-  {
-  }
-//------------------------------------------------------------------------------
+class MyRunaction : public G4UserRunAction
 {
-}
+  public:
+    MyRunaction();
+    ~MyRunaction();
 
-//------------------------------------------------------------------------------
-  UserActionInitialization::~UserActionInitialization()
-//------------------------------------------------------------------------------
-{
-}
-
-//------------------------------------------------------------------------------
-  void UserActionInitialization::Build() const
-//------------------------------------------------------------------------------
-{
-  SetUserAction( new BroadGenerator{});
-  //SetUserAction( new PencilbeamGenerator{});
-  SetUserAction( new MyRunaction );
-
-}
+    void BeginOfRunAction(const G4Run *);
+    void EndOfRunAction(const G4Run *);
+};
+#endif

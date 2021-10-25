@@ -21,61 +21,90 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
+#include <iostream>
+#include <getopt.h>
+
+#include "FTFP_BERT.hh"
 #include "G4RunManager.hh"
+#include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
-#include "G4UIExecutive.hh"
-#include "FTFP_BERT.hh"
+#include "CLHEP/Random/MTwistEngine.h"
 
 #include "geometry.h"
 #include "user_action_initialization.h"
-//-------------------------------------------------------------------------------
-  int main( int argc, char** argv )
-//-------------------------------------------------------------------------------
+#include "score_edeps.h"
+
+//-----------------------------------------------------------------------------
+void PrintOpt(char opt)
 {
-// Construct the default run manager
+   std::cout << opt << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+void SetDimention(char m, char *n)
+{
+   std::cout << m << n << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+int main( int argc, char** argv )
+{
+   //define longopt
+   const char* opt_string = "ht";
+
+   const struct option longopts[] ={
+   {  "help",     no_argument,          0,   'h'},
+   {  "test",     required_argument,    0,   't'},
+   {  "nx",       required_argument,    0,   'x'},
+   {  "ny",       required_argument,    0,   'y'},
+   {  "nz",       required_argument,    0,   'z'}
+   };
+
+   int longopt_index = 0;
+
+   auto n = getopt_long(argc, argv, opt_string, longopts, &longopt_index);
+
+   if( n == 'h'){
+      std::cout << "Help Me" << std::endl;
+   }
+
+   // Set random Engine
+   auto rand_mtwin = new CLHEP::MTwistEngine();
+   G4Random::setTheEngine(rand_mtwin);
+   G4Random::setTheSeed(142734);
+
+   // Construct the default run manager
    auto runManager = new G4RunManager{};
 
-// Set up mandatory user initialization: Geometry
+   // Set up mandatory user initialization: Geometry
    runManager->SetUserInitialization( new Geometry{} );
 
-// Set up mandatory user initialization: Physics-List
+   // Set up mandatory user initialization: Physics-List
    runManager->SetUserInitialization( new FTFP_BERT{} );
 
-// Set up user initialization: User Actions
+   // Set up user initialization: User Actions
    runManager->SetUserInitialization( new UserActionInitialization{} );
 
-// Initialize G4 kernel
+   // Initialize G4 kernel
    runManager->Initialize();
 
-// Create visualization environment
+   // Create visualization environment
    auto visManager = new G4VisExecutive{};
    visManager->Initialize();
 
-// Get UI (User Interface) manager
-//   G4UImanager* uiManager = G4UImanager::GetUIpointer();
-
-// Switch batch or interactive mode
-//   if ( argc == 1 ) {  // Interactive mode - no command argument
-//     auto uiExec = new G4UIExecutive{ argc, argv };
-//     uiExec->SessionStart();
-//     delete uiExec;
-//   } else {            // Batch mode - 1st command argument is a macro-filename
-//     G4String macroName = argv[1];
-//     uiManager->ApplyCommand( "/control/execute " + macroName );
-//   }
-
-// Start interactive session
+   // Start interactive session
    auto uiExec = new G4UIExecutive( argc, argv );
 
-   G4UImanager*  uiManager = G4UImanager::GetUIpointer();
+   //G4UImanager*  uiManager = G4UImanager::GetUIpointer();
 
    //controll visual
    //uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
 
    uiExec->SessionStart();
 
-// Job termination
+
+   // Job termination
    delete visManager;
    delete runManager;
 
