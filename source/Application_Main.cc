@@ -153,10 +153,10 @@ int main( int argc, char** argv )
   // Start interactive session
   auto uiExec = new G4UIExecutive( argc, argv );
 
-  //G4UImanager*  uiManager = G4UImanager::GetUIpointer();
+  G4UImanager*  uiManager = G4UImanager::GetUIpointer();
 
-  //controll visual
-  //uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
+  // controll visual
+  uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
 
   uiExec->SessionStart();
 
