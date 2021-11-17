@@ -38,8 +38,8 @@ public:
 
   static ScoreEdeps* GetInstance();
 
-  void SetDimention(char m, int n);
   void SetDimensions(int nx, int ny, int nz);
+  std::vector<int> GetDimensions();
 
   void CountEvent();
   int GetEventTimes() const;
@@ -50,11 +50,20 @@ public:
   void Print() const;// can print a event only
   void SaveToFile(const std::string& filename) const;
 
-  void AddPoint(double point_x, double point_y);
+  void AddPoint(double point_x, double point_y, double point_z);
   void SavePoint(const std::string& filename) const;
 
   void AddCos(double val);
   void SaveCos(const std::string& filename) const;
+
+  void AddTotallEDeps(double val);
+  double GetTotallEDeps() const;
+
+  void SetFile1(std::string filename);
+  void SetFile2(std::string filename);
+
+  std::string GetFile1();
+  std::string GetFile2();
 
 private:
   ScoreEdeps();
@@ -65,24 +74,33 @@ private:
 
   int event_counter_;
 
+  double totall_edeps_;
+
   std::vector<double> dose_list_;
+
   std::vector<double> points_list_x_;
   std::vector<double> points_list_y_;
-  std::vector<double> rand_cos_list_;
+  std::vector<double> points_list_z_;
+
+  std::string file_name_1_ = "data/test1.csv";
+  std::string file_name_2_ = "data/test2.csv";
 
 };
 
 // ===========================================================================
-inline void ScoreEdeps::SetDimention(char m, int n)
-{
-  //set dimension m n
-}
-//-----------------------------------------------------------------------------
 inline void ScoreEdeps::SetDimensions(int nx, int ny, int nz)
 {
   nx_ = nx;
   ny_ = ny;
   nz_ = nz;
+}
+
+//-----------------------------------------------------------------------------
+inline std::vector<int> ScoreEdeps::GetDimensions()
+{
+  std::vector<int> dim = {nx_, ny_, nz_};
+
+  return dim;
 }
 
 //-----------------------------------------------------------------------------
@@ -98,23 +116,39 @@ inline int ScoreEdeps::GetEventTimes() const
 }
 
 //----------------------------------------------------------------------------
-inline void ScoreEdeps::AddCos(double val)
+inline void ScoreEdeps::AddTotallEDeps(double val)
 {
-  rand_cos_list_.push_back(val);
+  totall_edeps_ += val;
 }
 
-//----------------------------------------------------------------------------
-inline void ScoreEdeps::SaveCos(const std::string& filename) const
+//-----------------------------------------------------------------------------
+inline double ScoreEdeps::GetTotallEDeps() const
 {
- std::ofstream file_pt(filename, std::ios::out);
+  return totall_edeps_;
+}
 
- for (int i = 0; i < rand_cos_list_.size(); i++) {
+//-----------------------------------------------------------------------------
+inline void ScoreEdeps::SetFile1(std::string filename)
+{
+  file_name_1_ = filename;
+}
 
-   file_pt << rand_cos_list_[i] << std::endl;
+//-----------------------------------------------------------------------------
+inline void ScoreEdeps::SetFile2(std::string filename)
+{
+  file_name_2_ = filename;
+}
 
- }
+//-----------------------------------------------------------------------------
+inline std::string ScoreEdeps::GetFile1()
+{
+  return file_name_1_;
+}
 
- file_pt.close();
+//-----------------------------------------------------------------------------
+inline std::string ScoreEdeps::GetFile2()
+{
+  return file_name_2_;
 }
 
 #endif

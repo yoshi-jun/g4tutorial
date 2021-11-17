@@ -33,21 +33,23 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
-#include "broad_generator.h"
+#include "g4broad_beam.h"
 #include "score_edeps.h"
 
-//------------------------------------------------------------------------------
-  BroadGenerator::BroadGenerator()
+//-----------------------------------------------------------------------------
+G4broadbeamGenerator::G4broadbeamGenerator()
 {
+
 }
 
-//------------------------------------------------------------------------------
-  BroadGenerator::~BroadGenerator()
+//-----------------------------------------------------------------------------
+G4broadbeamGenerator::~G4broadbeamGenerator()
 {
+
 }
 
-//------------------------------------------------------------------------------
-  void BroadGenerator::GeneratePrimaries( G4Event* anEvent )
+//-----------------------------------------------------------------------------
+void G4broadbeamGenerator::GeneratePrimaries(G4Event* anEvent)
 {
   //Get particle-talbe pointer
   G4ParticleTable* particle_table = G4ParticleTable::GetParticleTable();
@@ -55,19 +57,19 @@
   std::string aName = "e-";
   double momentam = 20.0 * MeV;
 
-  const auto ssd = 100. * cm;
-  const auto radius = 5. * std::sqrt(2.) * cm;
-  const auto field_half_size = 5. * cm;
-
   while (1) {
 
     auto rand_cos = G4UniformRand();
     auto rand_phi = G4UniformRand();
 
-    auto cos_theta_min = ssd / (std::sqrt(ssd * ssd + radius * radius));
-    auto xy_max = std::sqrt(1. - cos_theta_min * cos_theta_min); //sin_theta_min
+    const auto ssd = 100. * cm;
+    const auto radius = 5. * std::sqrt(2.) * cm;
+    const auto field_half_size = 5. * cm;
 
-    auto cos_theta = (1. - cos_theta_min) * rand_cos + cos_theta_min;
+    //auto cos_theta_min = ssd / (std::sqrt(ssd * ssd + radius * radius));
+
+    auto cos_theta = 2 * rand_cos -1 ;
+                            //(1. - cos_theta_min) * rand_cos + cos_theta_min;
     auto phi = 2. * pi * rand_phi;
 
     auto sin_theta = std::sqrt(1. - cos_theta * cos_theta);
@@ -76,46 +78,49 @@
     auto direc_y = sin_theta * std::sin(phi);
     auto direc_z = cos_theta;
 
-    auto sur_time = ssd/cos_theta;
+    auto time_surface = ssd / direc_z;
 
-    auto sur_x = direc_x * sur_time;
-    auto sur_y = direc_y * sur_time;
+    if (time_surface > 0) {
+      auto x_surface = direc_x * time_surface;
+      auto y_surface = direc_y * time_surface;
 
-    if (std::abs(direc_x) < field_half_size / ssd * cos_theta&&
-        std::abs(direc_y) < field_half_size / ssd * cos_theta )
-    {
+      if ( x_surface < field_half_size &&
+          x_surface > -field_half_size &&
+          y_surface < field_half_size &&
+          y_surface > -field_half_size)
+      {
 
-      G4ThreeVector direction = {direc_x, direc_y, direc_z};
+        G4ThreeVector direction = {direc_x, direc_y, direc_z};
 
-      // checke direction of broad beam
-      // auto souce_score = ScoreEdeps::GetInstance();
-      // souce_score-> AddPoint(x_surface, y_surface);
+        // checke direction of broad beam
+        // auto souce_score = ScoreEdeps::GetInstance();
+        // souce_score-> AddPoint(x_surface, y_surface);
 
-      G4ThreeVector momVec = momentam * direction;
+        G4ThreeVector momVec = momentam * direction;
 
-      auto particle_code = particle_table-> FindParticle(aName);
+        auto particle_code = particle_table-> FindParticle(aName);
 
-      auto primary_particle = new G4PrimaryParticle{ particle_code,
-                                                momVec.x(),
-                                                momVec.y(),
-                                                momVec.z()};
+        auto primary_particle = new G4PrimaryParticle{ particle_code,
+                                                  momVec.x(),
+                                                  momVec.y(),
+                                                  momVec.z()};
 
-      double pos_x = 0. * cm;
-      double pos_y = 0. * cm;
-      double pos_z = -65. * cm;
-      double time_zero = 0. * s;
+        double pos_x = 0. * cm;
+        double pos_y = 0. * cm;
+        double pos_z = 0. * cm;
+        double time_zero = 0. * s;
 
-      auto primary_vertex = new G4PrimaryVertex{pos_x, pos_y, pos_z,
-                                                time_zero};
+        auto primary_vertex = new G4PrimaryVertex{pos_x, pos_y, pos_z,
+                                                  time_zero};
 
-      primary_vertex-> SetPrimary(primary_particle);
+        primary_vertex-> SetPrimary(primary_particle);
 
-      anEvent-> AddPrimaryVertex(primary_vertex);
+        anEvent-> AddPrimaryVertex(primary_vertex);
 
-      break;
+        break;
 
+      };
     };
-
   };
 
 }

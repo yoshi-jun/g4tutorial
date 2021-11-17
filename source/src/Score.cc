@@ -33,6 +33,7 @@ ScoreEdeps::ScoreEdeps()
   : nx_{1}, ny_{1}, nz_{1}
 {
   event_counter_ = 0;
+  totall_edeps_ = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -61,8 +62,8 @@ void ScoreEdeps::AddDose(int ix, int iy, int iz, double val)
 void ScoreEdeps::Print() const
 {
   for ( int k = 0; k < nz_; k++ ) {
-    for ( int j = 0; j < ny_; j++ ) {
       for ( int i = 0; i < nx_; i++ ) {
+    for ( int j = 0; j < ny_; j++ ) {
 
         int idx = i + j * nx_ + k * nx_ * ny_;
 
@@ -103,10 +104,11 @@ void ScoreEdeps::SaveToFile(const std::string &filename) const
   dose_file_.close();
 }
 //----------------------------------------------------------------------------
-void ScoreEdeps::AddPoint(double point_x, double point_y)
+void ScoreEdeps::AddPoint(double point_x, double point_y, double point_z)
 {
   points_list_x_.push_back(point_x);
   points_list_y_.push_back(point_y);
+  points_list_z_.push_back(point_z);
 }
 
 //----------------------------------------------------------------------------
@@ -118,9 +120,13 @@ void ScoreEdeps::SavePoint(const std::string& filename) const
 
   for (int i = 0; i < points_list_x_.size(); i++) {
 
-    point_file << points_list_x_[i] << "," << points_list_y_[i] << std::endl;
+    point_file << points_list_x_[i] << ","
+               << points_list_y_[i] << ","
+               << points_list_z_[i] << std::endl;
 
   }
 
   point_file.close();
+
+  std::cout << "end of SavePoint" << std::endl;
 }

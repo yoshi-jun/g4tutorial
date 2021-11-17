@@ -21,39 +21,42 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// UserActionInitialization.cc
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#include <fstream>
 #include <iostream>
 
 #include "broad_generator.h"
+#include "beam_chooser.h"
+#include "g4broad_beam.h"
+#include "json.hpp"
 #include "my_runaction.h"
 #include "primary_generator.h"
 #include "user_action_initialization.h"
 
 
 //------------------------------------------------------------------------------
-  UserActionInitialization::UserActionInitialization()
-  : G4VUserActionInitialization
-  {
-  }
-//------------------------------------------------------------------------------
+UserActionInitialization::UserActionInitialization()
+: G4VUserActionInitialization{}
 {
 }
 
 //------------------------------------------------------------------------------
-  UserActionInitialization::~UserActionInitialization()
-//------------------------------------------------------------------------------
+UserActionInitialization::~UserActionInitialization()
 {
 }
 
 //------------------------------------------------------------------------------
-  void UserActionInitialization::Build() const
-//------------------------------------------------------------------------------
+void UserActionInitialization::Build() const
 {
-  SetUserAction( new BroadGenerator{});
-  //SetUserAction( new PencilbeamGenerator{});
+  auto chooser = BeamChooser::GetInstance();
+  auto flag = chooser-> GetChoosed();
+
+  if (flag) { SetUserAction( new BroadGenerator{}); }
+  else { SetUserAction( new PencilbeamGenerator{}); }
+
+  // std::cout << "test now g4broad beam" << std::endl;
+
+  // SetUserAction(new G4broadbeamGenerator{});
+
   SetUserAction( new MyRunaction );
 
 }

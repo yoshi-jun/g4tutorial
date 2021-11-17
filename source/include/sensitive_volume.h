@@ -25,12 +25,12 @@
 #define SENSITIVEVOLUME_H
 
 #include "G4VSensitiveDetector.hh"
+
 #include "score_edeps.h"
+
 class G4Step;
 
-//------------------------------------------------------------------------------
-  class SensitiveVolume : public G4VSensitiveDetector
-//------------------------------------------------------------------------------
+class SensitiveVolume : public G4VSensitiveDetector
 {
 public:
   SensitiveVolume(G4String);

@@ -57,14 +57,10 @@
   auto dose_score = ScoreEdeps::GetInstance();
 
   dose_score-> CountEvent();
-  auto events = dose_score -> GetEventTimes();
+  auto events = dose_score-> GetEventTimes();
 
   if ( events % 10000 == 0){
-    std::cout << "================================================" << std::endl
-              << "              The end of this event      "
-              << events << std::endl
-              << "================================================" << std::endl
-              << std::endl;
+    std::cout << "The end of event "<< events << std::endl;
   }
 
 }
@@ -73,7 +69,8 @@
   G4bool SensitiveVolume::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
   auto edep = aStep-> GetTotalEnergyDeposit();
-  auto stepLength = aStep-> GetStepLength();
+
+  //Get boxcell number (copyNum)
 
   auto copyNum_z = aStep-> GetPreStepPoint()-> GetTouchableHandle()
                       -> GetCopyNumber(0);
@@ -84,17 +81,29 @@
   auto copyNum_x = aStep-> GetPreStepPoint()-> GetTouchableHandle()
                       -> GetCopyNumber(2);
 
+  // std::cout << copyNum_x << "," << copyNum_y << std::endl;
+
+  //Get position before collegeon
+  auto pre_step_pt = aStep-> GetPreStepPoint()-> GetPosition();
+
+  //Score pre-step-point and Number of box-cell
   auto dose_score = ScoreEdeps::GetInstance();
 
-  auto souce_score = ScoreEdeps::GetInstance();
-
-  if (copyNum_z == 0) {
-    souce_score-> AddPoint(copyNum_x, copyNum_y);
-  }
   dose_score-> AddDose(copyNum_x, copyNum_y, copyNum_z, edep);
 
-	sum_eDep = sum_eDep + edep;
-  sum_stepLength = sum_stepLength + stepLength;
+  dose_score->AddTotallEDeps(edep);
+
+  if (aStep-> IsFirstStepInVolume()) {
+    if (copyNum_z == 0){
+      if (aStep-> GetTrack()-> GetParentID() == 0){
+        dose_score-> AddPoint(pre_step_pt[0] / cm,
+                              pre_step_pt[1] / cm,
+                              pre_step_pt[2] / cm);
+
+      }
+    }
+  }
+
 
   return true;
 }

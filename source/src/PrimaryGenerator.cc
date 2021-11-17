@@ -83,7 +83,7 @@
 
   double pos_x = 0. * cm;
   double pos_y = 0. * cm;
-  double pos_z = 0. * mm;
+  double pos_z = 35. * cm;
   double time_zero = 0. * s;
 
   auto primary_vertex = new G4PrimaryVertex{pos_x, pos_y, pos_z, time_zero};

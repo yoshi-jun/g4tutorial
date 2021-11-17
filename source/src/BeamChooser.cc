@@ -21,69 +21,43 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
-#include<iostream>
+#include <iostream>
 
 #include "beam_chooser.h"
-#include "my_runaction.h"
-#include "score_edeps.h"
 
-//-----------------------------------------------------------------------------
-MyRunaction::MyRunaction()
+//----------------------------------------------------------------------------
+BeamChooser::BeamChooser()
 {
+ beam_flag_ = 0;
 }
 
 //-----------------------------------------------------------------------------
-MyRunaction::~MyRunaction()
+BeamChooser* BeamChooser::GetInstance()
 {
+  static BeamChooser the_chooser;
+
+  return &the_chooser;
+}
+//-----------------------------------------------------------------------------
+void BeamChooser::SetChooser(int val)
+{
+  beam_flag_ = val;
 }
 
 //-----------------------------------------------------------------------------
-void MyRunaction::BeginOfRunAction(const G4Run *)
+bool BeamChooser::GetChoosed() const
 {
-  auto dose_score = ScoreEdeps::GetInstance();
-  dose_score-> InitializeDose();
-
-  std::cout << "000000000000000000000000000000000000000000000000000000000000000"
-            << std::endl
-            << "                             begin run" << std::endl
-            << "000000000000000000000000000000000000000000000000000000000000000"
-            << std::endl;
+  return beam_flag_ == 1;
 }
 
 //-----------------------------------------------------------------------------
-void MyRunaction::EndOfRunAction(const G4Run *)
+void BeamChooser::SetSaveCh(int val)
 {
-  auto chooser = BeamChooser::GetInstance();
-  auto flag_b = chooser-> GetChoosed();
-  auto flag_s = chooser->GetSaveCh();
+  save_flag_ = val;
+}
 
-  auto score_edeps = ScoreEdeps::GetInstance();
-  int event_times = score_edeps->GetEventTimes();
-
-  if (flag_s) {
-    if (flag_b) {
-
-      score_edeps-> SaveToFile("data/broadbeam_direct_all_water.csv");
-      score_edeps-> SavePoint("data/DitPts_broadbeam_direct_all_water.csv");
-
-    } else {
-
-      score_edeps-> SaveToFile("data/pencilbeam_direct_all_water.csv");
-      score_edeps-> SavePoint("data/DitPts_pencilbeam_direct_all_water.csv");
-
-    }
-  } else {
-    score_edeps-> SaveToFile("data/testbeam.csv");
-    score_edeps-> SavePoint("data/DitPts_testbeam.csv");
-  }
-
-  double tedep = score_edeps-> GetTotallEDeps();
-
-  std::cout << "totall edeps =" << tedep << std::endl;
-
-  std::cout << "000000000000000000000000000000000000000000000000000000000000000"
-            << std::endl
-            << "                            end run" << std::endl
-            << "000000000000000000000000000000000000000000000000000000000000000"
-            << std::endl;
+//-----------------------------------------------------------------------------
+bool BeamChooser::GetSaveCh() const
+{
+  return save_flag_ == 1;
 }

@@ -25,88 +25,144 @@
 #include <getopt.h>
 
 #include "FTFP_BERT.hh"
+#include "QGSP_BIC.hh"
 #include "G4RunManager.hh"
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 #include "CLHEP/Random/MTwistEngine.h"
 
+#include "beam_chooser.h"
 #include "geometry.h"
-#include "user_action_initialization.h"
+#include "json.hpp"
 #include "score_edeps.h"
+#include "user_action_initialization.h"
 
-//-----------------------------------------------------------------------------
-void PrintOpt(char opt)
+namespace {
+
+void show_help()
 {
-   std::cout << opt << std::endl;
+  const char* message =
+R"(
+usage:
+Application_Main [options]
+
+  -h, --help                show this message
+  -c, --conf <filename>     set config file
+)";
+  std::cout << message << std::endl;
 }
 
-//-----------------------------------------------------------------------------
-void SetDimention(char m, char *n)
-{
-   std::cout << m << n << std::endl;
-}
+} // end of namespace
 
-//-----------------------------------------------------------------------------
+//=============================================================================
 int main( int argc, char** argv )
 {
-   //define longopt
-   const char* opt_string = "ht";
+  // setting option
+  const char* optstring = "hc:b:";
+  const struct option long_options[] = {
+  {"help",  no_argument,  0,  'h'},
+  {"conf",  required_argument, 0, 'c'},
+  {0, 0,  0,  0},
+  };
 
-   const struct option longopts[] ={
-   {  "help",     no_argument,          0,   'h'},
-   {  "test",     required_argument,    0,   't'},
-   {  "nx",       required_argument,    0,   'x'},
-   {  "ny",       required_argument,    0,   'y'},
-   {  "nz",       required_argument,    0,   'z'}
-   };
+  std::string config_name = "";
 
-   int longopt_index = 0;
+  while (1) {
 
-   auto n = getopt_long(argc, argv, opt_string, longopts, &longopt_index);
+    int option_index = -1;
+    int c = getopt_long(argc, argv, optstring, long_options, &option_index);
 
-   if( n == 'h'){
-      std::cout << "Help Me" << std::endl;
-   }
+    if (c == -1) {
+      break;
+    }
 
-   // Set random Engine
-   auto rand_mtwin = new CLHEP::MTwistEngine();
-   G4Random::setTheEngine(rand_mtwin);
-   G4Random::setTheSeed(142734);
+    switch (c) {
+      case 'h' :
+        ::show_help();
+        std::exit(EXIT_SUCCESS);
+      case 'c' :
+        config_name = static_cast<std::string>(optarg);
+        break;
+    }
+  }
 
-   // Construct the default run manager
-   auto runManager = new G4RunManager{};
+  //---------------------------------------------------------------------------
+  //setting json element
+  std::ifstream fin(config_name);
 
-   // Set up mandatory user initialization: Geometry
-   runManager->SetUserInitialization( new Geometry{} );
+  if (!fin) {
+    std::cout << "You must include correct json file" <<std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+  nlohmann::json js;
 
-   // Set up mandatory user initialization: Physics-List
-   runManager->SetUserInitialization( new FTFP_BERT{} );
+  fin >> js;
 
-   // Set up user initialization: User Actions
-   runManager->SetUserInitialization( new UserActionInitialization{} );
+  int beam_flag = js["beam_flag"];
+  int save_flag = js["save_flag"];
+  int dim_nx = js["dim_x"];
+  int dim_ny = js["dim_y"];
+  int dim_nz = js["dim_z"];
 
-   // Initialize G4 kernel
-   runManager->Initialize();
+  //********************************No move************************************
 
-   // Create visualization environment
-   auto visManager = new G4VisExecutive{};
-   visManager->Initialize();
+  // Set file name from config.json
+  // auto file_name_1 = js["file_name_1"].get<std::string>();
+  // auto file_nam_2 = js["file_name_2"].get<std::string>();
 
-   // Start interactive session
-   auto uiExec = new G4UIExecutive( argc, argv );
+  //***************************************************************************
 
-   //G4UImanager*  uiManager = G4UImanager::GetUIpointer();
+  //  Set boxcell numeric x,y,z
+  auto score_edeps = ScoreEdeps::GetInstance();
+  score_edeps-> SetDimensions(dim_nx, dim_ny, dim_nz);
 
-   //controll visual
-   //uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
+  //  Set beam choser, Broad Beam = 1, Pencil Beam = 0
+  auto chooser = BeamChooser::GetInstance();
+  chooser-> SetChooser(beam_flag);
 
-   uiExec->SessionStart();
+  // Set save chooser Save = 1, Dont Save = 0
+  chooser-> SetSaveCh(save_flag);
 
+  //---------------------------------------------------------------------------
 
-   // Job termination
-   delete visManager;
-   delete runManager;
+  // Set random Engine
+  auto rand_mtwin = new CLHEP::MTwistEngine();
+  G4Random::setTheEngine(rand_mtwin);
+  G4Random::setTheSeed(123456789);
 
-   return 0;
+  // Construct the default run manager
+  auto runManager = new G4RunManager{};
+
+  // Set up mandatory user initialization: Geometry
+  runManager->SetUserInitialization( new Geometry{} );
+
+  // Set up mandatory user initialization: Physics-List
+  runManager->SetUserInitialization( new QGSP_BIC{} );
+
+  // Set up user initialization: User Actions
+  runManager->SetUserInitialization( new UserActionInitialization{} );
+
+  // Initialize G4 kernel
+  runManager->Initialize();
+
+  // Create visualization environment
+  auto visManager = new G4VisExecutive{};
+  visManager->Initialize();
+
+  // Start interactive session
+  auto uiExec = new G4UIExecutive( argc, argv );
+
+  //G4UImanager*  uiManager = G4UImanager::GetUIpointer();
+
+  //controll visual
+  //uiManager->ApplyCommand( "/control/execute GlobalSetup.mac" );
+
+  uiExec->SessionStart();
+
+  // Job termination
+  delete visManager;
+  delete runManager;
+
+  std::exit(EXIT_SUCCESS);
 }

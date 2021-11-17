@@ -54,13 +54,16 @@
 
 // Define 'World Volume'
    // Define the shape of solid
-   G4double leng_X_World = 100.0 * cm;         // X-full-length of world
-   G4double leng_Y_World = 100.0 * cm;         // Y-full-length of world
-   G4double leng_Z_World = 300.0 * cm;         // Z-full-length of world
+   G4double leng_X_World = 50.0 * cm;         // X-full-length of world
+   G4double leng_Y_World = 50.0 * cm;         // Y-full-length of world
+   G4double leng_Z_World = 150.0 * cm;         // Z-full-length of world
 
-   G4int nDiv_X = 61;
-   G4int nDiv_Y = 61;
-   G4int nDiv_Z = 150;
+   auto dose_score = ScoreEdeps::GetInstance();
+   auto ndiv = dose_score->GetDimensions();
+
+   G4int nDiv_X = ndiv[0];
+   G4int nDiv_Y = ndiv[1];
+   G4int nDiv_Z = ndiv[2];
 
    auto solid_World = new G4Box{ "Solid_World",
                          leng_X_World/2.0, leng_Y_World/2.0, leng_Z_World/2.0 };
@@ -85,7 +88,7 @@
                                    leng_Y_PixEnvG / 2.0, leng_Z_PixEnvG / 2.0 };
 
    // Define logical volume of the global envelop
-   G4Material* materi_PixEnvG = materi_Man->FindOrBuildMaterial( "G4_AIR" );
+   G4Material* materi_PixEnvG = materi_Man->FindOrBuildMaterial( "G4_WATER" );
    auto logVol_PixEnvG = new G4LogicalVolume{ solid_PixEnvG, materi_PixEnvG,
                                               "LogVol_PixEnvG" };
    logVol_PixEnvG->SetVisAttributes ( G4VisAttributes::Invisible );
@@ -148,7 +151,7 @@
 // Placement of the 'Pixel Detector' to the world: Put the 'global envelop'
    G4double pos_X_LogV_PixEnvG = 0.0 * cm;
    G4double pos_Y_LogV_PixEnvG = 0.0 * cm;
-   G4double pos_Z_LogV_PixEnvG = 115.5 * cm;
+   G4double pos_Z_LogV_PixEnvG = 50. * cm;
 
    auto threeVect_LogV_PixEnvG = G4ThreeVector{ pos_X_LogV_PixEnvG,
                                        pos_Y_LogV_PixEnvG, pos_Z_LogV_PixEnvG };
@@ -165,10 +168,6 @@
     logVol_PixElmts-> SetSensitiveDetector(aSV);
     auto SDman = G4SDManager::GetSDMpointer();
     SDman->AddNewDetector(aSV);
-
-
-   auto dose_score = ScoreEdeps::GetInstance();
-    dose_score-> SetDimensions(nDiv_X, nDiv_Y, nDiv_Z);
 
 // Return the physical world
    return physVol_World;
