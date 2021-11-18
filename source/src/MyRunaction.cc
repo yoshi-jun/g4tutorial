@@ -63,13 +63,13 @@ void MyRunaction::EndOfRunAction(const G4Run *)
   if (flag_s) {
     if (flag_b) {
 
-      score_edeps-> SaveToFile("data/broadbeam_direct_all_water.csv");
-      score_edeps-> SavePoint("data/DitPts_broadbeam_direct_all_water.csv");
+      score_edeps-> SaveToFile("data/broadbeam_galactic_all_water.csv");
+      score_edeps-> SavePoint("data/DitPts_broadbeam_galactic_all_water.csv");
 
     } else {
 
-      score_edeps-> SaveToFile("data/pencilbeam_direct_all_water.csv");
-      score_edeps-> SavePoint("data/DitPts_pencilbeam_direct_all_water.csv");
+      score_edeps-> SaveToFile("data/pencilbeam_galaxy_all_water.csv");
+      score_edeps-> SavePoint("data/DitPts_pencilbeam_galaxy_all_water.csv");
 
     }
   } else {

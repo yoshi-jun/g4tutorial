@@ -1,25 +1,25 @@
 /*==============================================================================
-  BSD 2-Clause License
-  Copyright (c) 2021 Junichi Yoshida
-  All rights reserved.
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+BSD 2-Clause License
+Copyright (c) 2021 Junichi Yoshida
+All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright notice,
+		this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+		this list of conditions and the following disclaimer in the documentation
+		and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ==============================================================================*/
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -38,137 +38,117 @@
 #include "geometry.h"
 #include "sensitive_volume.h"
 //------------------------------------------------------------------------------
-  Geometry::Geometry() {}
-//------------------------------------------------------------------------------
+Geometry::Geometry() {}
 
 //------------------------------------------------------------------------------
-  Geometry::~Geometry() {}
-//------------------------------------------------------------------------------
+Geometry::~Geometry() {}
+
 
 //------------------------------------------------------------------------------
-  G4VPhysicalVolume* Geometry::Construct()
-//------------------------------------------------------------------------------
+G4VPhysicalVolume* Geometry::Construct()
 {
-// Get pointer to 'Material Manager'
-   G4NistManager* materi_Man = G4NistManager::Instance();
+// Define materials
+	G4NistManager* materi_Man = G4NistManager::Instance();
 
-// Define 'World Volume'
-   // Define the shape of solid
-   G4double leng_X_World = 50.0 * cm;         // X-full-length of world
-   G4double leng_Y_World = 50.0 * cm;         // Y-full-length of world
-   G4double leng_Z_World = 150.0 * cm;         // Z-full-length of world
+	auto galactic = materi_Man-> FindOrBuildMaterial("G4_Galactic");
+	auto air      = materi_Man-> FindOrBuildMaterial("G4_AIR");
+	auto water    = materi_Man-> FindOrBuildMaterial("G4_WATER");
 
-   auto dose_score = ScoreEdeps::GetInstance();
-   auto ndiv = dose_score->GetDimensions();
+	// Define World
+	G4double leng_X_World = 50.0 * cm;
+	G4double leng_Y_World = 50.0 * cm;
+	G4double leng_Z_World = 150.0 * cm;
 
-   G4int nDiv_X = ndiv[0];
-   G4int nDiv_Y = ndiv[1];
-   G4int nDiv_Z = ndiv[2];
+	auto pv_world = new G4Box{ "PV_World",
+												leng_X_World/2.0, leng_Y_World/2.0, leng_Z_World/2.0 };
+	auto lv_world = new G4LogicalVolume{ pv_world, galactic,
+																					"LV_World" };
+	auto world  = new G4PVPlacement{ G4Transform3D(), "World",
+																			lv_world, 0, false, 0};
 
-   auto solid_World = new G4Box{ "Solid_World",
-                         leng_X_World/2.0, leng_Y_World/2.0, leng_Z_World/2.0 };
+//-----------------------------------------------------------------------------
+	// Define the number of boxcell
+	auto dose_score = ScoreEdeps::GetInstance();
+	auto ndiv = dose_score->GetDimensions();
 
-   // Define logical volume
-   G4Material* materi_World = materi_Man->FindOrBuildMaterial( "G4_AIR" );
-   auto logVol_World = new G4LogicalVolume{ solid_World, materi_World,
-                                            "LogVol_World" };
-   logVol_World->SetVisAttributes ( G4VisAttributes::Invisible );
+	G4int nDiv_X = ndiv[0];
+	G4int nDiv_Y = ndiv[1];
+	G4int nDiv_Z = ndiv[2];
 
-   // Placement of logical volume
-   G4int copyNum_World = 0;               // Set ID number of world
-   auto physVol_World  = new G4PVPlacement{ G4Transform3D(), "PhysVol_World",
-                                        logVol_World, 0, false, copyNum_World };
+	// Define the length of Water Box
+	G4double leng_X_Box = 30.5 * cm;
+	G4double leng_Y_Box = 30.5 * cm;
+	G4double leng_Z_Box = 30.0 * cm;
 
-// Define 'Pixel Detector' - Global Envelop
-   // Define the shape of the global envelop
-   G4double leng_X_PixEnvG = 30.5 * cm;
-   G4double leng_Y_PixEnvG = 30.5 * cm;
-   G4double leng_Z_PixEnvG = 30.0 * cm;
-   auto solid_PixEnvG = new G4Box{ "Solid_PixEnvG", leng_X_PixEnvG / 2.0,
-                                   leng_Y_PixEnvG / 2.0, leng_Z_PixEnvG / 2.0 };
+	// Define the length of a Boxcell
+	G4double leng_X_Boxcell = leng_X_Box / nDiv_X;
+	G4double leng_Y_Boxcell = leng_Y_Box / nDiv_Y;
+	G4double leng_Z_Boxcell = leng_Z_Box / nDiv_Z;
 
-   // Define logical volume of the global envelop
-   G4Material* materi_PixEnvG = materi_Man->FindOrBuildMaterial( "G4_WATER" );
-   auto logVol_PixEnvG = new G4LogicalVolume{ solid_PixEnvG, materi_PixEnvG,
-                                              "LogVol_PixEnvG" };
-   logVol_PixEnvG->SetVisAttributes ( G4VisAttributes::Invisible );
+	// Define the logical box
+	auto pv_solid_box = new G4Box{ "PV_Solid_Box",
+																	leng_X_Box / 2.0,
+																	leng_Y_Box / 2.0,
+																	leng_Z_Box / 2.0 };
+	auto lv_solid_box = new G4LogicalVolume{ pv_solid_box, water,
+																						"LV_Solid_Box" };
 
-// Define 'Pixel Detector'-Local Envelop (divided the global envelop in Y-direction)
-   // Define the shape of the local envelop
+	// Define logical boxcell X
+	auto pv_boxcell_x = new G4Box{ "PV_Bocell_X",
+																 	leng_X_Boxcell / 2.0,
+																 	leng_Y_Box 		 / 2.0,
+																 	leng_Z_Box 		 / 2.0 };
 
-   G4double leng_X_PixEnvL = leng_X_PixEnvG / nDiv_X;
-   G4double leng_Y_PixEnvL = leng_Y_PixEnvG;
-   G4double leng_Z_PixEnvL = leng_Z_PixEnvG;
-   auto solid_PixEnvL = new G4Box{ "Solid_PixEnvL", leng_X_PixEnvL / 2.0,
-                                   leng_Y_PixEnvL / 2.0, leng_Z_PixEnvL / 2.0 };
+	auto lv_boxcell_x = new G4LogicalVolume{ pv_boxcell_x, water,
+																						"LV_Boxcell_X" };
 
-   // Define logical volume of the local envelop
-   G4Material* materi_PixEnvL = materi_Man->FindOrBuildMaterial( "G4_WATER" );
-   auto logVol_PixEnvL = new G4LogicalVolume{ solid_PixEnvL, materi_PixEnvL,
-                                              "LogVol_PixEnvL" };
+	new G4PVReplica{ "Boxcell_X", lv_boxcell_x, lv_solid_box, kXAxis,
+									nDiv_X, leng_X_Boxcell };
 
-   // Placement of the local envelop to the global envelop using Replica
-   new G4PVReplica{ "PhysVol_PixEnvL", logVol_PixEnvL, logVol_PixEnvG, kXAxis,
-                    nDiv_X, leng_X_PixEnvL };
+	// Define logical boxcell XY
+	auto pv_boxcell_xy = new G4Box{ "PV_Boxcell_XY",
+																	leng_X_Boxcell / 2.0,
+																	leng_Y_Boxcell / 2.0,
+																	leng_Z_Box 		 / 2.0 };
 
-// Define 'Pixel Detector' - Pixel Element (divided the local envelop in X-direction)
-   // Define the shape of the pixel element
+	auto lv_boxcell_xy = new G4LogicalVolume{ pv_boxcell_xy, water,
+																						"LV_Boxcell_XY" };
+	new G4PVReplica{ "Boxcell_XY", lv_boxcell_xy, lv_boxcell_x, kYAxis,
+									nDiv_Y, leng_Y_Boxcell };
 
-   G4double leng_X_PixElmt = leng_X_PixEnvG / nDiv_X;
-   G4double leng_Y_PixElmt = leng_Y_PixEnvG / nDiv_Y;
-   G4double leng_Z_PixElmt = leng_Z_PixEnvG;
-   auto solid_PixElmt = new G4Box{ "Solid_PixElmt", leng_X_PixElmt / 2.0,
-                                   leng_Y_PixElmt / 2.0, leng_Z_PixElmt / 2.0 };
+	// Define logical boxcell XYZ
+	auto pv_boxcell_xyz = new G4Box{ "PV_Boxcell_XYZ",
+																		leng_X_Boxcell / 2.0,
+																		leng_Y_Boxcell / 2.0,
+																		leng_Z_Boxcell / 2.0 };
 
-   // Define logical volume of the pixel element
-   G4Material* materi_PixElmt = materi_Man->FindOrBuildMaterial( "G4_WATER" );
-   auto logVol_PixElmt = new G4LogicalVolume{ solid_PixElmt, materi_PixElmt,
-                                              "LogVol_PixElmt" };
+	auto lv_boxcell_xyz = new G4LogicalVolume{ pv_boxcell_xyz, water,
+																						"LV_Boxcell_XYZ" };
 
-   // Placement of pixel elements to the local envelop using Replica
-   new G4PVReplica{ "PhysVol_PixElmt", logVol_PixElmt, logVol_PixEnvL, kYAxis,
-                    nDiv_Y, leng_Y_PixElmt };
+	new G4PVReplica{ "Boxcell_XYZ", lv_boxcell_xyz, lv_boxcell_xy, kZAxis,
+									nDiv_Z, leng_Z_Boxcell };
 
-// Define 'Pixel Detector' - Pixel Element (divided the local envelop in Z-direction)
-   // Define the shape of the pixel element
+//-----------------------------------------------------------------------------
+	// Define the point of box
+	G4double pos_x_box = 0.0 * cm;
+	G4double pos_y_box = 0.0 * cm;
+	G4double pos_z_box = 50. * cm;
 
-   G4double leng_X_PixElmts = leng_X_PixEnvG / nDiv_X;
-   G4double leng_Y_PixElmts = leng_Y_PixEnvG / nDiv_Y;
-   G4double leng_Z_PixElmts = leng_Z_PixEnvG / nDiv_Z;
-   auto solid_PixElmts = new G4Box{ "Solid_PixElmts", leng_X_PixElmts / 2.0,
-                                   leng_Y_PixElmts / 2.0, leng_Z_PixElmts / 2.0 };
+	//Place the Box to world
+	auto pos_box = G4ThreeVector{ pos_x_box,
+																pos_y_box,
+																pos_z_box };
 
-   // Define logical volume of the pixel element
-   G4Material* materi_PixElmts = materi_Man->FindOrBuildMaterial( "G4_WATER" );
-   auto logVol_PixElmts = new G4LogicalVolume{ solid_PixElmts, materi_PixElmts,
-                                              "LogVol_PixElmts" };
-
-   // Placement of pixel elements to the local envelop using Replica
-   new G4PVReplica{ "PhysVol_PixElmts", logVol_PixElmts, logVol_PixElmt, kZAxis,
-                    nDiv_Z, leng_Z_PixElmts };
-
-//=============================================================================
-// Placement of the 'Pixel Detector' to the world: Put the 'global envelop'
-   G4double pos_X_LogV_PixEnvG = 0.0 * cm;
-   G4double pos_Y_LogV_PixEnvG = 0.0 * cm;
-   G4double pos_Z_LogV_PixEnvG = 50. * cm;
-
-   auto threeVect_LogV_PixEnvG = G4ThreeVector{ pos_X_LogV_PixEnvG,
-                                       pos_Y_LogV_PixEnvG, pos_Z_LogV_PixEnvG };
-   auto rotMtrx_LogV_PixEnvG = G4RotationMatrix{};
-   auto trans3D_LogV_PixEnvG = G4Transform3D{ rotMtrx_LogV_PixEnvG,
-                                              threeVect_LogV_PixEnvG };
-
-   G4int copyNum_LogV_PixEnvG = 1000;          // Set ID number of LogV_PixEnvG
-   new G4PVPlacement{ trans3D_LogV_PixEnvG, "PhysVol_PixEnvG", logVol_PixEnvG,
-                      physVol_World, false, copyNum_LogV_PixEnvG };
+	auto rot_box = G4RotationMatrix{};
+	auto lv_box = G4Transform3D{ rot_box, pos_box};
+	new G4PVPlacement{ lv_box, "Box", lv_solid_box, world, false, 0};
 
 // Sensitive volume
-    auto aSV = new SensitiveVolume("SensitiveVolume");
-    logVol_PixElmts-> SetSensitiveDetector(aSV);
-    auto SDman = G4SDManager::GetSDMpointer();
-    SDman->AddNewDetector(aSV);
+	auto aSV = new SensitiveVolume("SensitiveVolume");
+	lv_boxcell_xyz-> SetSensitiveDetector(aSV);
+	auto SDman = G4SDManager::GetSDMpointer();
+	SDman->AddNewDetector(aSV);
 
 // Return the physical world
-   return physVol_World;
+	return world;
 }
