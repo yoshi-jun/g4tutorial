@@ -26,6 +26,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4PVReplica.hh"
+#include "G4PVParameterised.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4ThreeVector.hh"
 #include "G4RotationMatrix.hh"
@@ -36,6 +37,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "G4SDManager.hh"
 
 #include "geometry.h"
+#include "phantom_boxell.h"
 #include "sensitive_volume.h"
 //------------------------------------------------------------------------------
 Geometry::Geometry() {}
@@ -47,7 +49,7 @@ Geometry::~Geometry() {}
 //------------------------------------------------------------------------------
 G4VPhysicalVolume* Geometry::Construct()
 {
-// Define materials
+	// Define materials
 	G4NistManager* materi_Man = G4NistManager::Instance();
 
 	auto galactic = materi_Man-> FindOrBuildMaterial("G4_Galactic");
@@ -93,7 +95,7 @@ G4VPhysicalVolume* Geometry::Construct()
 	auto lv_solid_box = new G4LogicalVolume{ pv_solid_box, water,
 																						"LV_Solid_Box" };
 
-	// Define logical boxcell X
+	// Define boxcell X
 	auto pv_boxcell_x = new G4Box{ "PV_Bocell_X",
 																 	leng_X_Boxcell / 2.0,
 																 	leng_Y_Box 		 / 2.0,
@@ -105,7 +107,7 @@ G4VPhysicalVolume* Geometry::Construct()
 	new G4PVReplica{ "Boxcell_X", lv_boxcell_x, lv_solid_box, kXAxis,
 									nDiv_X, leng_X_Boxcell };
 
-	// Define logical boxcell XY
+	// Define boxcell XY
 	auto pv_boxcell_xy = new G4Box{ "PV_Boxcell_XY",
 																	leng_X_Boxcell / 2.0,
 																	leng_Y_Boxcell / 2.0,
@@ -113,10 +115,11 @@ G4VPhysicalVolume* Geometry::Construct()
 
 	auto lv_boxcell_xy = new G4LogicalVolume{ pv_boxcell_xy, water,
 																						"LV_Boxcell_XY" };
+
 	new G4PVReplica{ "Boxcell_XY", lv_boxcell_xy, lv_boxcell_x, kYAxis,
 									nDiv_Y, leng_Y_Boxcell };
 
-	// Define logical boxcell XYZ
+	// Define boxcell XYZ
 	auto pv_boxcell_xyz = new G4Box{ "PV_Boxcell_XYZ",
 																		leng_X_Boxcell / 2.0,
 																		leng_Y_Boxcell / 2.0,
@@ -125,8 +128,14 @@ G4VPhysicalVolume* Geometry::Construct()
 	auto lv_boxcell_xyz = new G4LogicalVolume{ pv_boxcell_xyz, water,
 																						"LV_Boxcell_XYZ" };
 
-	new G4PVReplica{ "Boxcell_XYZ", lv_boxcell_xyz, lv_boxcell_xy, kZAxis,
-									nDiv_Z, leng_Z_Boxcell };
+	// new G4PVReplica{ "Boxcell_XYZ", lv_boxcell_xyz, lv_boxcell_xy, kZAxis,
+	// 								nDiv_Z, leng_Z_Boxcell };
+
+	G4VNestedParameterisation* param {nullptr};
+	auto cell_status = new PhantomBoxcell("G4_WATER");
+	cell_status-> Setdatas(nDiv_Z, leng_Z_Boxcell);
+	new G4VPVParameterisation("Boxcell_XYZ", lv_boxcell_xyz, lv_boxcell_xy,
+														kZAxis, nDiv_Z, cell_status);
 
 //-----------------------------------------------------------------------------
 	// Define the point of box
