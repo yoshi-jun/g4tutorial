@@ -134,7 +134,7 @@ G4VPhysicalVolume* Geometry::Construct()
 	G4VNestedParameterisation* param {nullptr};
 	auto cell_status = new PhantomBoxcell("G4_WATER");
 	cell_status-> Setdatas(nDiv_Z, leng_Z_Boxcell);
-	new G4VPVParameterisation("Boxcell_XYZ", lv_boxcell_xyz, lv_boxcell_xy,
+	new G4PVParameterised("Boxcell_XYZ", lv_boxcell_xyz, lv_boxcell_xy,
 														kZAxis, nDiv_Z, cell_status);
 
 //-----------------------------------------------------------------------------

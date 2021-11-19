@@ -26,6 +26,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "G4VPhysicalVolume.hh"
 #include "G4VTouchable.hh"
 
+#include "G4SystemOfUnits.hh"
 #include "phantom_boxell.h"
 
 namespace
@@ -72,6 +73,7 @@ void PhantomBoxcell::ComputeTransformation(const int idx,
                                        G4VPhysicalVolume* physvol) const
 {
   double z = dz_ * ( -nz_ / 2. + idx + 0.5 );
+  std::cout << z / cm << std::endl;
   auto vec = G4ThreeVector(0., 0., z);
   physvol-> SetTranslation(vec);
 }
