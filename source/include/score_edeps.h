@@ -65,6 +65,10 @@ public:
   std::string GetFile1();
   std::string GetFile2();
 
+  void AddKineE(double val);
+  void SaveKineE(const std::string& filename) const;
+
+
 private:
   ScoreEdeps();
 
@@ -84,6 +88,8 @@ private:
 
   std::string file_name_1_ = "data/test1.csv";
   std::string file_name_2_ = "data/test2.csv";
+
+  std::vector<double> kine_e_;
 
 };
 

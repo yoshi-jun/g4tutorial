@@ -40,11 +40,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "phantom_boxell.h"
 #include "sensitive_volume.h"
 //------------------------------------------------------------------------------
-Geometry::Geometry() {}
+Geometry::Geometry()
+{}
 
 //------------------------------------------------------------------------------
-Geometry::~Geometry() {}
-
+Geometry::~Geometry()
+{}
 
 //------------------------------------------------------------------------------
 G4VPhysicalVolume* Geometry::Construct()
@@ -63,7 +64,7 @@ G4VPhysicalVolume* Geometry::Construct()
 
 	auto pv_world = new G4Box{ "PV_World",
 												leng_X_World/2.0, leng_Y_World/2.0, leng_Z_World/2.0 };
-	auto lv_world = new G4LogicalVolume{ pv_world, galactic,
+	auto lv_world = new G4LogicalVolume{ pv_world, air,
 																					"LV_World" };
 	auto world  = new G4PVPlacement{ G4Transform3D(), "World",
 																			lv_world, 0, false, 0};

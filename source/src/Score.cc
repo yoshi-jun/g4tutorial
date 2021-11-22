@@ -130,3 +130,22 @@ void ScoreEdeps::SavePoint(const std::string& filename) const
 
   std::cout << "end of SavePoint" << std::endl;
 }
+
+//-----------------------------------------------------------------------------
+void ScoreEdeps::AddKineE(double val)
+{
+  kine_e_.push_back(val);
+}
+
+//-----------------------------------------------------------------------------
+
+void ScoreEdeps::SaveKineE(const std::string& filename) const
+{
+  std::ofstream kine_file(filename, std::ios::out);
+
+  for (int i; i < kine_e_.size(); i++) {
+    kine_file << kine_e_[i] << std::endl;
+  }
+
+  kine_file.close();
+}

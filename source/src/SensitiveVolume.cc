@@ -85,17 +85,50 @@
 
   //Get position before collegeon
   auto pre_step_pt = aStep-> GetPreStepPoint()-> GetPosition();
+  auto post_step_pt = aStep-> GetPostStepPoint() ->GetPosition();
+
+  auto post_step_materi = aStep ->GetPostStepPoint()-> GetMaterial();
+  auto pre_step_materi = aStep-> GetPreStepPoint()-> GetMaterial();
+
+  auto kinetic_e = aStep->GetTrack() ->GetVertexKineticEnergy();
 
   //Score pre-step-point and Number of box-cell
   auto dose_score = ScoreEdeps::GetInstance();
 
   dose_score-> AddDose(copyNum_x, copyNum_y, copyNum_z, edep);
 
-  dose_score->AddTotallEDeps(edep);
+  dose_score-> AddTotallEDeps(edep);
+
+  // std::cout << "kinetic e "
+  //           << post_step_pt[0] / cm << "[cm]" << ","
+  //           << post_step_pt[1] / cm << "[cm]" << ","
+  //           << post_step_pt[2] / cm << "[cm]" << ","
+  //           << kinetic_e / MeV << "[MeV]" << std::endl;
 
   if (aStep-> IsFirstStepInVolume()) {
     if (copyNum_z == 0){
       if (aStep-> GetTrack()-> GetParentID() == 0){
+
+        // std::cout << std::endl;
+        // std::cout << post_step_materi << std::endl;
+        // std::cout << pre_step_materi << std::endl;
+
+
+        // std::cout << "pre step point  = "
+        //           << pre_step_pt[0] / cm << "[cm]" << ","
+        //           << pre_step_pt[1] / cm << "[cm]" << ","
+        //           << pre_step_pt[2] / cm << "[cm]" << std::endl;
+
+        // std::cout << "post step point = "
+        //           << post_step_pt[0] / cm << "[cm]" << ","
+        //           << post_step_pt[1] / cm << "[cm]" << ","
+        //           << post_step_pt[2] / cm << "[cm]" << std::endl;
+
+        // std::cout << "kinetic         = " << kinetic_e / MeV << "[MeV]"
+        //           << std::endl;
+
+        dose_score-> AddKineE(kinetic_e);
+
         dose_score-> AddPoint(pre_step_pt[0] / cm,
                               pre_step_pt[1] / cm,
                               pre_step_pt[2] / cm);

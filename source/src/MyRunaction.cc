@@ -63,18 +63,22 @@ void MyRunaction::EndOfRunAction(const G4Run *)
   if (flag_s) {
     if (flag_b) {
 
-      score_edeps-> SaveToFile("data/broadbeam_galactic_all_water.csv");
-      score_edeps-> SavePoint("data/DitPts_broadbeam_galactic_all_water.csv");
+      score_edeps-> SaveToFile("data/broadbeam_single_voxel.csv");
+      score_edeps-> SavePoint("data/DitPts_broadbeam_single_voxel.csv");
 
     } else {
 
-      score_edeps-> SaveToFile("data/pencilbeam_galaxy_all_water.csv");
-      score_edeps-> SavePoint("data/DitPts_pencilbeam_galaxy_all_water.csv");
+      score_edeps-> SaveToFile("data/pencilbeam_single_voxel.csv");
+      score_edeps-> SavePoint("data/DitPts_pencilbeam_single_voxel.csv");
 
     }
   } else {
     score_edeps-> SaveToFile("data/testbeam.csv");
     score_edeps-> SavePoint("data/DitPts_testbeam.csv");
+
+    score_edeps-> SaveKineE("data/pencil_kinematic_energy_surf.csv");
+
+    std::cout << "end save " << std::endl;
   }
 
   double tedep = score_edeps-> GetTotallEDeps();

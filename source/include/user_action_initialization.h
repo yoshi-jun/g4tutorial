@@ -27,13 +27,12 @@
 #include "G4VUserActionInitialization.hh"
 
 //------------------------------------------------------------------------------
-  class UserActionInitialization : public G4VUserActionInitialization
-//------------------------------------------------------------------------------
+class UserActionInitialization : public G4VUserActionInitialization
 {
-  public:
-    UserActionInitialization();
-    virtual ~UserActionInitialization();
+public:
+  UserActionInitialization();
+  virtual ~UserActionInitialization();
 
-    virtual void Build() const;
+  virtual void Build() const;
 };
 #endif

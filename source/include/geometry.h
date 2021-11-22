@@ -29,7 +29,7 @@ class G4VPhysicalVolume;
 
 //------------------------------------------------------------------------------
   class Geometry : public G4VUserDetectorConstruction
-//------------------------------------------------------------------------------
+
 {
   public:
     Geometry();

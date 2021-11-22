@@ -73,7 +73,6 @@ void PhantomBoxcell::ComputeTransformation(const int idx,
                                        G4VPhysicalVolume* physvol) const
 {
   double z = dz_ * ( -nz_ / 2. + idx + 0.5 );
-  std::cout << z / cm << std::endl;
   auto vec = G4ThreeVector(0., 0., z);
   physvol-> SetTranslation(vec);
 }
